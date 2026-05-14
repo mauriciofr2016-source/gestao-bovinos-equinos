@@ -1,0 +1,1727 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Gestão Fazenda">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>Gestão Fazenda</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+:root {
+  --verde: #ffffff;
+  --verde-escuro: #0a0a0a;
+  --verde-claro: #d6d6d6;
+  --verde-super: #ffffff;
+  --creme: #ffffff;
+  --creme-escuro: #e6e6e6;
+  --terra: #a8a8a8;
+  --dourado: #d9b45f;
+  --bg: #000000;
+  --bg2: #070707;
+  --bg3: #111111;
+  --borda: rgba(255,255,255,0.12);
+  --borda2: rgba(255,255,255,0.22);
+  --texto: #ffffff;
+  --texto2: #c8c8c8;
+  --texto3: #858585;
+  --card: #0b0b0b;
+  --card2: #151515;
+  --danger: #ff6b6b;
+  --danger-bg: rgba(255,107,107,0.13);
+  --success: #76e39a;
+  --success-bg: rgba(118,227,154,0.13);
+  --warning: #d9b45f;
+  --warning-bg: rgba(217,180,95,0.15);
+  --radius: 12px;
+  --radius-sm: 8px;
+  --radius-lg: 18px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--bg)}
+body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
+/* SPLASH */
+#splash{position:fixed;inset:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:999;transition:opacity .5s;padding:24px;text-align:center}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-logo-img{width:168px;height:168px;border-radius:28px;object-fit:cover;margin-bottom:16px;box-shadow:0 0 0 1px rgba(255,255,255,.15),0 18px 60px rgba(255,255,255,.08)}
+.splash-logo{font-family:'Fraunces',serif;font-size:36px;font-weight:500;color:#fff;margin-bottom:8px;text-transform:lowercase}
+.splash-sub{color:var(--texto2);font-size:13px;font-weight:300;letter-spacing:2px;text-transform:uppercase}
+.splash-dot{width:8px;height:8px;border-radius:50%;background:#fff;animation:pulse 1.2s ease-in-out infinite;margin-top:32px}
+@keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+/* LOGIN */
+.login-screen{display:none;min-height:100vh;background:#000;padding:28px 18px;align-items:center;justify-content:center}
+.login-card{width:100%;max-width:420px;background:linear-gradient(180deg,#111,#050505);border:1px solid var(--borda2);border-radius:24px;padding:24px;box-shadow:0 22px 80px rgba(255,255,255,.06)}
+.login-logo{display:block;width:150px;height:150px;object-fit:cover;border-radius:24px;margin:0 auto 18px;border:1px solid var(--borda2)}
+.login-title{font-family:'Fraunces',serif;font-size:30px;text-align:center;color:#fff;text-transform:lowercase;margin-bottom:6px}
+.login-sub{text-align:center;color:var(--texto2);font-size:13px;line-height:1.45;margin-bottom:20px}
+.login-help{font-size:11px;color:var(--texto3);line-height:1.5;text-align:center;margin-top:14px}
+/* LAYOUT */
+#app{display:flex;flex-direction:column;height:100vh;overflow:hidden;background:#000}
+.topbar{background:#000;border-bottom:1px solid var(--borda);padding:10px 12px 8px;display:flex;flex-direction:column;gap:8px;flex-shrink:0;box-shadow:0 8px 30px rgba(0,0,0,.35)}
+.topbar-main{display:flex;align-items:center;gap:10px;width:100%}
+.topbar-logo{width:38px;height:38px;border-radius:10px;object-fit:cover;border:1px solid var(--borda2)}
+.topbar-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;color:#fff;text-transform:lowercase;flex:1;line-height:1}
+.topbar-sub{font-size:11px;color:var(--texto3);font-weight:300}
+.top-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.btn-logout{background:transparent;border:1px solid var(--borda2);border-radius:999px;color:var(--texto2);font-size:11px;padding:6px 9px;cursor:pointer}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0}
+.sync-dot.off{background:var(--warning)}
+.content{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-top:2px}
+.content::-webkit-scrollbar{width:4px}.content::-webkit-scrollbar-track{background:transparent}.content::-webkit-scrollbar-thumb{background:var(--borda2);border-radius:2px}
+/* NAV TOP */
+.nav{background:#000;border-top:none;border-bottom:1px solid var(--borda);display:flex;gap:6px;padding:4px 0 10px;overflow-x:auto;flex-shrink:0;scrollbar-width:none}
+.nav::-webkit-scrollbar{display:none}
+.nav-btn{min-width:78px;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:8px 8px 7px;cursor:pointer;color:var(--texto3);transition:all .2s;border:1px solid var(--borda);background:#0a0a0a;font-family:'DM Sans',sans-serif;position:relative;border-radius:14px}
+.nav-btn.active{color:#000;background:#fff;border-color:#fff;box-shadow:0 8px 24px rgba(255,255,255,.12)}
+.nav-btn .nav-ico{font-size:18px;margin-bottom:3px;transition:transform .2s}.nav-btn.active .nav-ico{transform:translateY(-1px)}
+.nav-btn .nav-label{font-size:10px;font-weight:700;letter-spacing:.2px}.nav-badge{position:absolute;top:4px;right:5px;background:var(--danger);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:99px;min-width:16px;text-align:center}
+
+/* PAGES */
+.page{display:none;padding:16px}
+.page.active{display:block}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius);padding:14px}
+.card+.card{margin-top:10px}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.card-title{font-family:'Fraunces',serif;font-size:16px;font-weight:500;color:var(--creme)}
+
+/* METRIC CARDS */
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.metric{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-sm);padding:12px}
+.metric-label{font-size:11px;color:var(--texto3);font-weight:400;margin-bottom:4px;text-transform:uppercase;letter-spacing:.5px}
+.metric-val{font-size:22px;font-weight:500;color:var(--texto)}
+.metric-val.green{color:var(--success)}
+.metric-val.red{color:var(--danger)}
+.metric-val.gold{color:var(--dourado)}
+
+/* ANIMAL CARDS */
+.animal-card{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius);padding:14px;margin-bottom:10px;cursor:pointer;transition:border-color .2s}
+.animal-card:hover,.animal-card:active{border-color:var(--verde-claro)}
+.animal-card.vendido{opacity:.65;border-style:dashed}
+.animal-row{display:flex;align-items:center;gap:12px}
+.animal-emoji{font-size:32px;flex-shrink:0}
+.animal-info{flex:1;min-width:0}
+.animal-nome{font-family:'Fraunces',serif;font-size:16px;font-weight:500;color:var(--creme);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.animal-tipo{font-size:12px;color:var(--texto2);margin-bottom:4px}
+.animal-right{text-align:right;flex-shrink:0}
+.animal-custo{font-size:15px;font-weight:500;color:var(--danger)}
+.animal-dias{font-size:11px;color:var(--texto3)}
+
+/* BADGES */
+.badge{display:inline-block;font-size:10px;font-weight:500;padding:2px 7px;border-radius:99px;letter-spacing:.3px}
+.badge-green{background:var(--success-bg);color:var(--success)}
+.badge-red{background:var(--danger-bg);color:var(--danger)}
+.badge-gold{background:rgba(200,150,62,.2);color:var(--dourado)}
+.badge-blue{background:rgba(90,140,220,.2);color:#7ab0f0}
+.badge-gray{background:rgba(255,255,255,.08);color:var(--texto2)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:var(--radius-sm);padding:10px 18px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s,transform .1s;user-select:none}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:#fff;color:#000;border:1px solid #fff}
+.btn-primary:hover{background:#e8e8e8}
+.btn-danger{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger)}
+.btn-ghost{background:transparent;color:var(--texto2);border:1px solid var(--borda2)}
+.btn-gold{background:rgba(217,180,95,.18);color:var(--dourado);border:1px solid var(--dourado)}
+.btn:disabled{opacity:.4;pointer-events:none}
+.btn-full{width:100%;margin-top:8px}
+
+/* FORM */
+.form-group{margin-bottom:12px}
+.form-label{font-size:12px;color:var(--texto2);margin-bottom:5px;display:block;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.form-control{width:100%;background:var(--bg3);border:1px solid var(--borda2);border-radius:var(--radius-sm);padding:10px 12px;color:var(--texto);font-family:'DM Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.form-control:focus{border-color:var(--verde-claro)}
+.form-control option{background:var(--bg2)}
+.form-row{display:grid;gap:10px}
+.form-row.cols2{grid-template-columns:1fr 1fr}
+.form-row.cols3{grid-template-columns:1fr 1fr 1fr}
+
+/* TABS internas */
+.inner-tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--radius-sm);padding:3px;margin-bottom:14px}
+.inner-tab{flex:1;text-align:center;padding:7px 4px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;color:var(--texto3);transition:all .2s}
+.inner-tab.active{background:#fff;color:#000}
+
+/* LISTA simples */
+.list-item{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--borda)}
+.list-item:last-child{border-bottom:none}
+.list-desc{font-size:13px;color:var(--texto)}
+.list-sub{font-size:11px;color:var(--texto3);margin-top:1px}
+.list-val{font-size:13px;font-weight:500}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--borda2);border-radius:var(--radius-lg) var(--radius-lg) 0 0;width:100%;max-width:600px;max-height:92vh;overflow-y:auto;transform:translateY(40px);transition:transform .25s;padding:20px 16px calc(20px + env(safe-area-inset-bottom))}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:36px;height:4px;background:var(--borda2);border-radius:2px;margin:0 auto 16px}
+.modal-title{font-family:'Fraunces',serif;font-size:20px;font-weight:500;color:var(--creme);margin-bottom:16px}
+
+/* CONFIRM */
+.confirm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s}
+.confirm-overlay.open{opacity:1;pointer-events:all}
+.confirm-box{background:var(--bg2);border:1px solid var(--borda2);border-radius:var(--radius-lg);padding:24px;max-width:340px;width:100%;text-align:center}
+.confirm-icon{font-size:36px;margin-bottom:12px}
+.confirm-title{font-family:'Fraunces',serif;font-size:18px;color:var(--creme);margin-bottom:8px}
+.confirm-msg{font-size:13px;color:var(--texto2);margin-bottom:20px;line-height:1.5}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btns .btn{flex:1}
+
+/* TOAST */
+.toast-wrap{position:fixed;top:16px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:8px;pointer-events:none;width:calc(100% - 32px);max-width:400px}
+.toast{background:var(--card2);border:1px solid var(--borda2);border-radius:var(--radius-sm);padding:12px 16px;font-size:13px;font-weight:500;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(-10px);transition:all .3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast.success{border-color:var(--success);color:var(--success)}
+.toast.error{border-color:var(--danger);color:var(--danger)}
+.toast.info{border-color:var(--verde-claro);color:var(--verde-super)}
+
+/* CALENDÁRIO */
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}
+.cal-dow{text-align:center;font-size:10px;color:var(--texto3);padding:4px 0;font-weight:500}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:6px;font-size:12px;cursor:default;position:relative}
+.cal-day.today{background:#fff;color:#000;font-weight:700}
+.cal-day.has-event{cursor:pointer}
+.cal-day.has-event::after{content:'';position:absolute;bottom:3px;width:4px;height:4px;border-radius:50%;background:var(--dourado)}
+.cal-day.other-month{opacity:.3}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.cal-nav-btn{background:var(--bg3);border:1px solid var(--borda);border-radius:var(--radius-sm);padding:6px 12px;color:var(--texto2);cursor:pointer;font-size:13px}
+.cal-month{font-family:'Fraunces',serif;font-size:16px;color:var(--creme)}
+
+/* PRENHEZ */
+.prenhez-card{background:var(--warning-bg);border:1px solid rgba(212,160,58,.3);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
+.prenhez-animal{font-weight:500;color:var(--creme);margin-bottom:4px}
+.prenhez-info{font-size:12px;color:var(--texto2)}
+.prenhez-parto{font-size:13px;color:var(--dourado);font-weight:500;margin-top:4px}
+.prenhez-prog{height:6px;background:var(--bg3);border-radius:3px;margin-top:8px;overflow:hidden}
+.prenhez-prog-fill{height:100%;background:var(--dourado);border-radius:3px;transition:width .4s}
+
+/* ESTOQUE */
+.est-row{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius-sm);padding:12px;margin-bottom:8px}
+.est-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.est-emoji{font-size:22px}
+.est-nome{font-weight:500;color:var(--creme);flex:1}
+.est-saldo{font-weight:500;color:var(--texto)}
+.est-prog{height:4px;background:var(--bg3);border-radius:2px;overflow:hidden;margin-top:4px}
+.est-prog-fill{height:100%;border-radius:2px;transition:width .4s}
+
+/* FINANCEIRO */
+.fin-section{margin-bottom:16px}
+.fin-titulo{font-size:11px;color:var(--texto3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:500}
+
+/* VENDA MODAL - ficha */
+.ficha-section{margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--borda)}
+.ficha-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.ficha-titulo{font-size:11px;color:var(--texto3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;font-weight:500}
+
+/* SECTION TITLE */
+.section-title{font-family:'Fraunces',serif;font-size:18px;font-weight:500;color:var(--creme);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+
+/* EMPTY STATE */
+.empty{text-align:center;padding:40px 20px;color:var(--texto3)}
+.empty-ico{font-size:40px;margin-bottom:12px;opacity:.5}
+.empty-txt{font-size:14px}
+
+/* TRATO MULTI */
+.trato-item{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px}
+.trato-item select,.trato-item input{background:transparent;border:none;color:var(--texto);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;flex:1;min-width:0}
+.trato-item input{width:60px;text-align:right}
+.trato-remove{color:var(--danger);font-size:16px;cursor:pointer;flex-shrink:0;padding:2px 4px}
+
+/* FICHA DETAIL */
+.detail-panel{display:none;background:var(--bg3);border-radius:0 0 var(--radius) var(--radius);margin-top:-2px;border:1px solid var(--borda);border-top:none;padding:14px}
+.detail-panel.open{display:block}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <img class="splash-logo-img" src="icons/logo-gestao-fazenda.png" alt="Gestão Fazenda">
+  <div class="splash-logo">gestão fazenda</div>
+  <div class="splash-sub">Carregando sistema</div>
+  <div class="splash-dot"></div>
+</div>
+
+<div id="login-screen" class="login-screen">
+  <div class="login-card">
+    <img class="login-logo" src="icons/logo-gestao-fazenda.png" alt="Gestão Fazenda">
+    <div class="login-title">gestão fazenda</div>
+    <div class="login-sub">Acesso privado para controle do plantel, trato, saúde, estoque e financeiro.</div>
+    <div class="form-group">
+      <label class="form-label">E-mail</label>
+      <input type="email" class="form-control" id="login-email" placeholder="seuemail@exemplo.com" autocomplete="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Senha</label>
+      <input type="password" class="form-control" id="login-senha" placeholder="Sua senha" autocomplete="current-password">
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-login" onclick="entrarLogin()">Entrar</button>
+    <div class="login-help">Use um usuário criado no Firebase Authentication. O Firestore só deve permitir acesso autenticado.</div>
+  </div>
+</div>
+
+<div id="app" style="display:none">
+  <div class="topbar">
+    <div class="topbar-main">
+      <img class="topbar-logo" src="icons/logo-gestao-fazenda.png" alt="Gestão Fazenda">
+      <div>
+        <div class="topbar-title">gestão fazenda</div>
+        <div class="topbar-sub">controle privado da fazenda</div>
+      </div>
+      <div class="top-actions">
+        <div class="sync-dot" id="sync-dot" title="Sincronizado"></div>
+        <span style="font-size:11px;color:var(--texto3)" id="sync-label">Sincronizado</span>
+        <button class="btn-logout" onclick="sairLogin()">Sair</button>
+      </div>
+    </div>
+  </div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="setPage('animais',this)">
+      <div class="nav-ico">🐄</div>
+      <div class="nav-label">Animais</div>
+    </button>
+    <button class="nav-btn" onclick="setPage('trato',this)">
+      <div class="nav-ico">🌾</div>
+      <div class="nav-label">Trato</div>
+    </button>
+    <button class="nav-btn" onclick="setPage('saude',this)">
+      <div class="nav-ico">💉</div>
+      <div class="nav-label">Saúde</div>
+      <div class="nav-badge" id="badge-saude" style="display:none"></div>
+    </button>
+    <button class="nav-btn" onclick="setPage('calendario',this)">
+      <div class="nav-ico">📅</div>
+      <div class="nav-label">Calendário</div>
+    </button>
+    <button class="nav-btn" onclick="setPage('estoque',this)">
+      <div class="nav-ico">📦</div>
+      <div class="nav-label">Estoque</div>
+    </button>
+    <button class="nav-btn" onclick="setPage('financeiro',this)">
+      <div class="nav-ico">💰</div>
+      <div class="nav-label">Financeiro</div>
+    </button>
+  </nav>
+
+  <div class="content" id="content">
+    <!-- ANIMAIS -->
+    <div class="page active" id="pg-animais">
+      <div class="metrics" id="metrics-animais"></div>
+      <div class="inner-tabs">
+        <div class="inner-tab active" onclick="setInnerTab('animais','plantel',this)">No Plantel</div>
+        <div class="inner-tab" onclick="setInnerTab('animais','vendidos',this)">Vendidos</div>
+      </div>
+      <div class="section-title">
+        <span id="animais-tab-title">Plantel</span>
+        <button class="btn btn-primary" onclick="abrirModalAnimal()" id="btn-add-animal">+ Novo Animal</button>
+      </div>
+      <div id="lista-animais"></div>
+    </div>
+
+    <!-- TRATO -->
+    <div class="page" id="pg-trato">
+      <div class="section-title">
+        Registrar Trato
+        <button class="btn btn-ghost" onclick="addTratoItem()">+ Linha</button>
+      </div>
+      <div class="card" style="margin-bottom:14px">
+        <div class="form-group">
+          <label class="form-label">Animal</label>
+          <select class="form-control" id="trato-animal"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data do trato</label>
+          <input type="date" class="form-control" id="trato-data">
+        </div>
+        <div id="trato-itens"></div>
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--texto2)">Custo total calculado:</span>
+          <span style="font-size:16px;font-weight:500;color:var(--danger)" id="trato-total-preview">R$ 0,00</span>
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-salvar-trato" onclick="salvarTrato()">Registrar Trato</button>
+      </div>
+      <div class="section-title" style="margin-top:8px">Histórico de Trato</div>
+      <div id="hist-trato"></div>
+    </div>
+
+    <!-- SAÚDE -->
+    <div class="page" id="pg-saude">
+      <div class="section-title">
+        Saúde
+        <button class="btn btn-primary" onclick="abrirModalSaude()">+ Registrar</button>
+      </div>
+      <div class="inner-tabs">
+        <div class="inner-tab active" onclick="setInnerTab('saude','alertas',this)">Alertas</div>
+        <div class="inner-tab" onclick="setInnerTab('saude','historico',this)">Histórico</div>
+      </div>
+      <div id="saude-conteudo"></div>
+    </div>
+
+    <!-- CALENDÁRIO -->
+    <div class="page" id="pg-calendario">
+      <div class="section-title">
+        Calendário
+        <button class="btn btn-gold" onclick="abrirModalPrenhez()">+ Prenhez</button>
+      </div>
+      <div class="card" style="margin-bottom:12px">
+        <div class="cal-nav">
+          <button class="cal-nav-btn" onclick="navCal(-1)">&#8592;</button>
+          <div class="cal-month" id="cal-month-label"></div>
+          <button class="cal-nav-btn" onclick="navCal(1)">&#8594;</button>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+      </div>
+      <div class="section-title">Gestações Ativas</div>
+      <div id="prenhez-list"></div>
+    </div>
+
+    <!-- ESTOQUE -->
+    <div class="page" id="pg-estoque">
+      <div class="metrics" id="metrics-estoque"></div>
+      <div class="section-title">
+        Estoque
+        <button class="btn btn-primary" onclick="abrirModalEstoque()">+ Entrada</button>
+      </div>
+      <div id="lista-estoque"></div>
+    </div>
+
+    <!-- FINANCEIRO -->
+    <div class="page" id="pg-financeiro">
+      <div class="metrics" id="metrics-fin"></div>
+      <div class="card">
+        <div class="inner-tabs">
+          <div class="inner-tab active" onclick="setInnerTab('fin','despesas',this)">Despesas</div>
+          <div class="inner-tab" onclick="setInnerTab('fin','receitas',this)">Receitas</div>
+        </div>
+        <div id="fin-conteudo"></div>
+      </div>
+      <div style="margin-top:10px" class="card">
+        <div class="card-title" style="margin-bottom:10px">Por Animal</div>
+        <div id="fin-por-animal"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- CONFIRM -->
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <div class="confirm-icon" id="confirm-icon">⚠️</div>
+    <div class="confirm-title" id="confirm-title">Confirmar</div>
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-btns">
+      <button class="btn btn-ghost" onclick="fecharConfirm(false)">Cancelar</button>
+      <button class="btn btn-danger" id="confirm-ok" onclick="fecharConfirm(true)">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ANIMAL -->
+<div class="modal-overlay" id="modal-animal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-animal-title">Novo Animal</div>
+    <input type="hidden" id="animal-edit-id">
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Nome</label>
+        <input class="form-control" id="f-nome" placeholder="Ex: Trovão">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Espécie</label>
+        <select class="form-control" id="f-especie" onchange="atualizarEmoji()">
+          <option value="vaca">Vaca</option>
+          <option value="boi">Boi</option>
+          <option value="cavalo">Cavalo</option>
+          <option value="egua">Égua</option>
+          <option value="bezerro">Bezerro</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Raça</label>
+        <input class="form-control" id="f-raca" placeholder="Ex: Nelore">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Sexo</label>
+        <select class="form-control" id="f-sexo">
+          <option value="macho">Macho</option>
+          <option value="femea">Fêmea</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Data de entrada</label>
+        <input type="date" class="form-control" id="f-entrada">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor pago (R$)</label>
+        <input type="number" class="form-control" id="f-valor" placeholder="0,00" step="0.01">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Peso na entrada (kg)</label>
+      <input type="number" class="form-control" id="f-peso" placeholder="Ex: 350">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <textarea class="form-control" id="f-obs" rows="2" placeholder="Detalhes, procedência..."></textarea>
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-salvar-animal" onclick="salvarAnimal()">Salvar Animal</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-animal')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL FICHA ANIMAL -->
+<div class="modal-overlay" id="modal-ficha">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div id="ficha-conteudo"></div>
+  </div>
+</div>
+
+<!-- MODAL VENDA -->
+<div class="modal-overlay" id="modal-venda">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar Venda</div>
+    <input type="hidden" id="venda-animal-id">
+    <div id="venda-resumo" style="margin-bottom:14px"></div>
+    <div class="form-group">
+      <label class="form-label">Data da venda</label>
+      <input type="date" class="form-control" id="v-data">
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Valor de venda (R$)</label>
+        <input type="number" class="form-control" id="v-valor" placeholder="0,00" step="0.01" oninput="calcVenda()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Comprador</label>
+        <input class="form-control" id="v-comprador" placeholder="Nome">
+      </div>
+    </div>
+    <div id="venda-resultado" style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px"></div>
+    <button class="btn btn-primary btn-full" id="btn-confirmar-venda" onclick="confirmarVenda()">Confirmar Venda</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-venda')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL SAUDE -->
+<div class="modal-overlay" id="modal-saude">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar Saúde</div>
+    <div class="form-group">
+      <label class="form-label">Animal</label>
+      <select class="form-control" id="s-animal"></select>
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Tipo</label>
+        <select class="form-control" id="s-tipo">
+          <option value="vacina">Vacina</option>
+          <option value="medicamento">Medicamento</option>
+          <option value="exame">Exame</option>
+          <option value="procedimento">Procedimento</option>
+          <option value="outro">Outro</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input type="date" class="form-control" id="s-data">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Descrição / produto</label>
+      <input class="form-control" id="s-desc" placeholder="Ex: Vacina aftosa, Ivermectina...">
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Custo (R$)</label>
+        <input type="number" class="form-control" id="s-custo" placeholder="0,00" step="0.01">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Próxima dose (opcional)</label>
+        <input type="date" class="form-control" id="s-proxima">
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Veterinário / observações</label>
+      <input class="form-control" id="s-obs" placeholder="Nome do vet, observações...">
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-salvar-saude" onclick="salvarSaude()">Salvar Registro</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-saude')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL PRENHEZ -->
+<div class="modal-overlay" id="modal-prenhez">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Registrar Prenhez</div>
+    <div class="form-group">
+      <label class="form-label">Animal (fêmea)</label>
+      <select class="form-control" id="p-animal"></select>
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Data da cobertura</label>
+        <input type="date" class="form-control" id="p-cobertura" oninput="calcParto()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de cobertura</label>
+        <select class="form-control" id="p-tipo">
+          <option value="natural">Natural</option>
+          <option value="ia">Inseminação Artificial</option>
+          <option value="te">Transferência de Embrião</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Reprodutor / touro</label>
+      <input class="form-control" id="p-reprodutor" placeholder="Nome do reprodutor">
+    </div>
+    <div id="p-parto-preview" style="background:var(--warning-bg);border:1px solid rgba(212,160,58,.3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--dourado)"></div>
+    <div class="form-group">
+      <label class="form-label">Observações</label>
+      <textarea class="form-control" id="p-obs" rows="2" placeholder="Anotações, diagnóstico..."></textarea>
+    </div>
+    <button class="btn btn-gold btn-full" id="btn-salvar-prenhez" onclick="salvarPrenhez()">Registrar Prenhez</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-prenhez')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL ESTOQUE -->
+<div class="modal-overlay" id="modal-estoque">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title">Entrada de Insumo</div>
+    <div class="form-group">
+      <label class="form-label">Insumo</label>
+      <select class="form-control" id="e-insumo">
+        <option value="racao">Ração</option>
+        <option value="silagem">Silagem</option>
+        <option value="feno">Feno</option>
+        <option value="sal">Sal mineral</option>
+        <option value="suplemento">Suplemento</option>
+        <option value="outro">Outro</option>
+      </select>
+    </div>
+    <div class="form-row cols2">
+      <div class="form-group">
+        <label class="form-label">Quantidade (kg)</label>
+        <input type="number" class="form-control" id="e-qtd" placeholder="Ex: 200" oninput="calcEstoque()">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor total pago (R$)</label>
+        <input type="number" class="form-control" id="e-valor" placeholder="Ex: 560" oninput="calcEstoque()">
+      </div>
+    </div>
+    <div id="e-custo-kg" style="font-size:12px;color:var(--texto2);margin-bottom:12px;padding:8px 10px;background:var(--bg3);border-radius:var(--radius-sm)">Custo por kg: —</div>
+    <div class="form-group">
+      <label class="form-label">Data da compra</label>
+      <input type="date" class="form-control" id="e-data">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Fornecedor</label>
+      <input class="form-control" id="e-fornecedor" placeholder="Nome do fornecedor">
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-salvar-estoque" onclick="salvarEstoque()">Registrar Entrada</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-estoque')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL EVENTO CAL -->
+<div class="modal-overlay" id="modal-evento-cal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="evento-cal-title">Eventos do Dia</div>
+    <div id="evento-cal-conteudo"></div>
+    <button class="btn btn-ghost btn-full" style="margin-top:12px" onclick="fecharModal('modal-evento-cal')">Fechar</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc, serverTimestamp, enableIndexedDbPersistence }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+
+const firebaseConfig = {
+  apiKey: "COLOQUE_SUA_API_KEY",
+  authDomain: "COLOQUE_SEU_AUTH_DOMAIN",
+  projectId: "COLOQUE_SEU_PROJECT_ID",
+  storageBucket: "COLOQUE_SEU_STORAGE_BUCKET",
+  messagingSenderId: "COLOQUE_SEU_MESSAGING_SENDER_ID",
+  appId: "COLOQUE_SEU_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+setPersistence(auth, browserLocalPersistence).catch(() => {});
+enableIndexedDbPersistence(db).catch(() => {});
+
+// ─── STATE ──────────────────────────────────────────────────
+let DB = {
+  animais: [],
+  tratos: [],
+  saude: [],
+  prenhez: [],
+  estoque: [],
+  financeiro: []
+};
+
+let currentUser = null;
+let calMes = new Date().getMonth();
+let calAno = new Date().getFullYear();
+let innerTabAtual = { animais: 'plantel', saude: 'alertas', fin: 'despesas' };
+let confirmCb = null;
+let btnLock = {};
+let tratoItens = [];
+
+const ESPECIES = {
+  vaca: '🐄', boi: '🐂', cavalo: '🐴', egua: '🐎', bezerro: '🐮', outro: '🐾'
+};
+const GESTACAO = { vaca: 283, egua: 340, outro: 285 };
+const INSUMO_NOMES = { racao:'Ração', silagem:'Silagem', feno:'Feno', sal:'Sal Mineral', suplemento:'Suplemento', outro:'Outro' };
+const INSUMO_EMOJI = { racao:'🌾', silagem:'🌽', feno:'🍀', sal:'🧂', suplemento:'💊', outro:'📦' };
+
+// ─── FIREBASE SYNC SEGURA POR USUÁRIO ─────────────────────────
+function colRef(colecao) {
+  if (!currentUser) throw new Error('Usuário não autenticado');
+  return collection(db, 'users', currentUser.uid, colecao);
+}
+function docRef(colecao, id) {
+  if (!currentUser) throw new Error('Usuário não autenticado');
+  return doc(db, 'users', currentUser.uid, colecao, id);
+}
+
+async function salvarFirestore(colecao, id, dados) {
+  try {
+    setSyncStatus(false);
+    await setDoc(docRef(colecao, id), { ...dados, donoUid: currentUser.uid, _ts: serverTimestamp() }, { merge: true });
+    setSyncStatus(true);
+    return true;
+  } catch(e) {
+    setSyncStatus(true);
+    toast('Erro ao salvar: ' + e.message, 'error');
+    return false;
+  }
+}
+
+async function deletarFirestore(colecao, id) {
+  try {
+    await deleteDoc(docRef(colecao, id));
+    return true;
+  } catch(e) {
+    toast('Erro ao excluir: ' + e.message, 'error');
+    return false;
+  }
+}
+
+async function carregarTudo() {
+  const cols = ['animais','tratos','saude','prenhez','estoque','financeiro'];
+  for (const col of cols) {
+    try {
+      const snap = await getDocs(colRef(col));
+      DB[col] = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    } catch(e) {
+      DB[col] = [];
+      toast('Erro ao carregar '+col+': '+e.message, 'error');
+    }
+  }
+  renderTudo();
+}
+
+function resetDB() {
+  DB = { animais: [], tratos: [], saude: [], prenhez: [], estoque: [], financeiro: [] };
+}
+
+function setSyncStatus(ok) {
+  document.getElementById('sync-dot').className = 'sync-dot' + (ok ? '' : ' off');
+  document.getElementById('sync-label').textContent = ok ? 'Sincronizado' : 'Salvando...';
+}
+
+window.entrarLogin = async function() {
+  if (!lockBtn('btn-login', 2500)) return;
+  const email = document.getElementById('login-email').value.trim();
+  const senha = document.getElementById('login-senha').value;
+  if (!email || !senha) {
+    toast('Informe e-mail e senha.', 'error');
+    unlockBtn('btn-login');
+    return;
+  }
+  try {
+    await signInWithEmailAndPassword(auth, email, senha);
+    toast('Login realizado com sucesso.', 'success');
+  } catch(e) {
+    toast('Erro no login: ' + traduzErroAuth(e.code), 'error');
+    unlockBtn('btn-login');
+  }
+};
+
+window.sairLogin = async function() {
+  const ok = await confirmar('Sair do sistema?', 'Você precisará informar e-mail e senha para entrar novamente.', '🔒');
+  if (!ok) return;
+  await signOut(auth);
+};
+
+function traduzErroAuth(code) {
+  const erros = {
+    'auth/invalid-credential': 'e-mail ou senha incorretos.',
+    'auth/user-not-found': 'usuário não encontrado.',
+    'auth/wrong-password': 'senha incorreta.',
+    'auth/too-many-requests': 'muitas tentativas. Aguarde um pouco.',
+    'auth/network-request-failed': 'falha de internet.'
+  };
+  return erros[code] || code || 'não foi possível entrar.';
+}
+
+// ─── HELPERS ────────────────────────────────────────────────
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+function hoje() { return new Date().toISOString().slice(0,10); }
+function fmtR(v) { return 'R$ ' + (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmtData(d) { if (!d) return '—'; const p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function diasEntre(d1, d2) {
+  const a = new Date(d1), b = new Date(d2);
+  return Math.round((b-a)/(1000*60*60*24));
+}
+function addDias(data, n) {
+  const d = new Date(data); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);
+}
+function custoAnimal(id) {
+  const a = DB.animais.find(x=>x.id===id);
+  if (!a) return 0;
+  let total = parseFloat(a.valorCompra)||0;
+  total += DB.tratos.filter(t=>t.animalId===id).reduce((s,t)=>s+(parseFloat(t.custo)||0),0);
+  total += DB.saude.filter(s=>s.animalId===id).reduce((s,r)=>s+(parseFloat(r.custo)||0),0);
+  return total;
+}
+function nomeAnimal(id) { const a = DB.animais.find(x=>x.id===id); return a ? a.nome : '—'; }
+function lockBtn(id, ms=1500) {
+  if (btnLock[id]) return false;
+  btnLock[id] = true;
+  const el = document.getElementById(id);
+  if (el) { el.dataset.originalText = el.textContent; el.disabled = true; if (!el.textContent.includes('...')) el.textContent = 'Aguarde...'; }
+  setTimeout(() => unlockBtn(id), ms);
+  return true;
+}
+function unlockBtn(id) {
+  btnLock[id] = false;
+  const el = document.getElementById(id);
+  if (el) { el.disabled = false; if (el.dataset.originalText) el.textContent = el.dataset.originalText; }
+}
+
+// ─── TOAST ──────────────────────────────────────────────────
+function toast(msg, tipo='info') {
+  const wrap = document.getElementById('toast-wrap');
+  const el = document.createElement('div');
+  el.className = 'toast ' + tipo;
+  el.textContent = msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(() => { el.classList.add('show'); });
+  setTimeout(() => { el.classList.remove('show'); setTimeout(() => el.remove(), 400); }, 3000);
+}
+window.toast = toast;
+
+// ─── CONFIRM ────────────────────────────────────────────────
+function confirmar(titulo, msg, icone='⚠️') {
+  return new Promise(res => {
+    document.getElementById('confirm-icon').textContent = icone;
+    document.getElementById('confirm-title').textContent = titulo;
+    document.getElementById('confirm-msg').textContent = msg;
+    confirmCb = res;
+    document.getElementById('confirm-overlay').classList.add('open');
+  });
+}
+window.fecharConfirm = function(ok) {
+  document.getElementById('confirm-overlay').classList.remove('open');
+  if (confirmCb) { confirmCb(ok); confirmCb = null; }
+};
+
+// ─── MODAIS ─────────────────────────────────────────────────
+window.fecharModal = function(id) {
+  document.getElementById(id).classList.remove('open');
+};
+function abrirModal(id) {
+  document.getElementById(id).classList.add('open');
+}
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ─── NAVEGAÇÃO ──────────────────────────────────────────────
+window.setPage = function(page, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pg-' + page).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('content').scrollTop = 0;
+  if (page === 'animais') renderAnimais();
+  if (page === 'trato') renderTrato();
+  if (page === 'saude') renderSaude();
+  if (page === 'calendario') renderCalendario();
+  if (page === 'estoque') renderEstoque();
+  if (page === 'financeiro') renderFinanceiro();
+};
+
+window.setInnerTab = function(ctx, tab, el) {
+  innerTabAtual[ctx] = tab;
+  el.parentElement.querySelectorAll('.inner-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  if (ctx === 'animais') renderAnimais();
+  if (ctx === 'saude') renderSaude();
+  if (ctx === 'fin') renderFinanceiro();
+};
+
+// ─── RENDER TUDO ────────────────────────────────────────────
+function renderTudo() {
+  renderAnimais();
+  renderTrato();
+  renderSaude();
+  renderCalendario();
+  renderEstoque();
+  renderFinanceiro();
+  atualizarBadgeSaude();
+}
+
+// ─── ANIMAIS ────────────────────────────────────────────────
+function renderAnimais() {
+  const tab = innerTabAtual.animais;
+  const lista = tab === 'plantel'
+    ? DB.animais.filter(a => a.status !== 'vendido')
+    : DB.animais.filter(a => a.status === 'vendido');
+
+  document.getElementById('animais-tab-title').textContent = tab === 'plantel' ? 'Plantel' : 'Vendidos';
+  document.getElementById('btn-add-animal').style.display = tab === 'plantel' ? '' : 'none';
+
+  const totalCusto = DB.animais.filter(a=>a.status!=='vendido').reduce((s,a)=>s+custoAnimal(a.id),0);
+  const recVendas = DB.financeiro.filter(f=>f.tipo==='receita'&&f.categoria==='venda').reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
+  const totalDesp = DB.financeiro.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
+
+  document.getElementById('metrics-animais').innerHTML = `
+    <div class="metric"><div class="metric-label">No plantel</div><div class="metric-val">${DB.animais.filter(a=>a.status!=='vendido').length}</div></div>
+    <div class="metric"><div class="metric-label">Custo acumulado</div><div class="metric-val red">${fmtR(totalCusto)}</div></div>
+    <div class="metric"><div class="metric-label">Receita vendas</div><div class="metric-val green">${fmtR(recVendas)}</div></div>
+    <div class="metric"><div class="metric-label">Lucro líquido</div><div class="metric-val ${recVendas-totalDesp>=0?'green':'red'}">${fmtR(recVendas-totalDesp)}</div></div>
+  `;
+
+  if (!lista.length) {
+    document.getElementById('lista-animais').innerHTML = `<div class="empty"><div class="empty-ico">${tab==='plantel'?'🐄':'🏷️'}</div><div class="empty-txt">${tab==='plantel'?'Nenhum animal no plantel.<br>Toque em + Novo Animal para começar.':'Nenhum animal vendido ainda.'}</div></div>`;
+    return;
+  }
+
+  document.getElementById('lista-animais').innerHTML = lista.map(a => {
+    const custo = custoAnimal(a.id);
+    const dias = diasEntre(a.dataEntrada, a.status==='vendido' ? a.dataSaida : hoje());
+    const prenhez = DB.prenhez.find(p => p.animalId === a.id && p.status === 'ativa');
+    let badges = '';
+    if (prenhez) badges += `<span class="badge badge-gold">🤰 Gestante</span> `;
+    if (a.status === 'vendido') badges += `<span class="badge badge-gray">Vendido ${fmtData(a.dataSaida)}</span>`;
+    return `<div class="animal-card ${a.status==='vendido'?'vendido':''}" onclick="abrirFicha('${a.id}')">
+      <div class="animal-row">
+        <div class="animal-emoji">${ESPECIES[a.especie]||'🐾'}</div>
+        <div class="animal-info">
+          <div class="animal-nome">${a.nome}</div>
+          <div class="animal-tipo">${a.especie.charAt(0).toUpperCase()+a.especie.slice(1)} · ${a.raca||'S/R'} · ${dias}d no plantel</div>
+          <div style="margin-top:3px">${badges}</div>
+        </div>
+        <div class="animal-right">
+          <div class="animal-custo">${fmtR(custo)}</div>
+          <div class="animal-dias">custo total</div>
+          ${a.status!=='vendido'?`<div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
+            <button class="btn btn-gold" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();abrirVenda('${a.id}')">Vender</button>
+            <button class="btn btn-danger" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();excluirAnimal('${a.id}')">✕</button>
+          </div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── FICHA ANIMAL ───────────────────────────────────────────
+window.abrirFicha = function(id) {
+  const a = DB.animais.find(x=>x.id===id);
+  if (!a) return;
+  const custo = custoAnimal(id);
+  const dias = diasEntre(a.dataEntrada, a.status==='vendido' ? a.dataSaida : hoje());
+  const tratos = DB.tratos.filter(t=>t.animalId===id).sort((a,b)=>b.data.localeCompare(a.data));
+  const saudes = DB.saude.filter(s=>s.animalId===id).sort((a,b)=>b.data.localeCompare(a.data));
+  const prenhez = DB.prenhez.filter(p=>p.animalId===id);
+  const custoTrato = tratos.reduce((s,t)=>s+(parseFloat(t.custo)||0),0);
+  const custoSaude = saudes.reduce((s,s2)=>s+(parseFloat(s2.custo)||0),0);
+
+  let fichaHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
+      <div style="font-size:44px">${ESPECIES[a.especie]||'🐾'}</div>
+      <div>
+        <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:500;color:var(--creme)">${a.nome}</div>
+        <div style="font-size:13px;color:var(--texto2)">${a.especie} · ${a.raca||'S/R'} · ${a.sexo}</div>
+        ${a.status==='vendido'?'<span class="badge badge-gray" style="margin-top:4px">Vendido</span>':''}
+      </div>
+    </div>
+    <div class="ficha-section">
+      <div class="ficha-titulo">Dados gerais</div>
+      <div class="list-item"><span class="list-desc">Entrada</span><span class="list-val">${fmtData(a.dataEntrada)}</span></div>
+      <div class="list-item"><span class="list-desc">Dias no plantel</span><span class="list-val">${dias} dias</span></div>
+      <div class="list-item"><span class="list-desc">Valor de compra</span><span class="list-val" style="color:var(--danger)">${fmtR(a.valorCompra)}</span></div>
+      <div class="list-item"><span class="list-desc">Peso entrada</span><span class="list-val">${a.pesoEntrada||'—'} kg</span></div>
+      ${a.status==='vendido'?`
+      <div class="list-item"><span class="list-desc">Data da venda</span><span class="list-val">${fmtData(a.dataSaida)}</span></div>
+      <div class="list-item"><span class="list-desc">Valor de venda</span><span class="list-val" style="color:var(--success)">${fmtR(a.valorVenda)}</span></div>
+      <div class="list-item"><span class="list-desc">Comprador</span><span class="list-val">${a.comprador||'—'}</span></div>
+      <div class="list-item"><span class="list-desc">Lucro/Prejuízo</span><span class="list-val" style="color:${(parseFloat(a.valorVenda)-custo)>=0?'var(--success)':'var(--danger)'}">${fmtR(parseFloat(a.valorVenda)-custo)}</span></div>
+      `:''}
+      ${a.obs?`<div style="margin-top:8px;font-size:12px;color:var(--texto2);padding:8px;background:var(--bg3);border-radius:var(--radius-sm)">${a.obs}</div>`:''}
+    </div>
+    <div class="ficha-section">
+      <div class="ficha-titulo">Custos acumulados</div>
+      <div class="list-item"><span class="list-desc">Compra</span><span class="list-val" style="color:var(--danger)">${fmtR(a.valorCompra)}</span></div>
+      <div class="list-item"><span class="list-desc">Alimentação/Trato</span><span class="list-val" style="color:var(--danger)">${fmtR(custoTrato)}</span></div>
+      <div class="list-item"><span class="list-desc">Saúde/Vet</span><span class="list-val" style="color:var(--danger)">${fmtR(custoSaude)}</span></div>
+      <div class="list-item" style="border-top:1px solid var(--borda2);padding-top:8px;margin-top:4px"><span class="list-desc" style="font-weight:500">TOTAL</span><span class="list-val" style="color:var(--danger);font-size:16px">${fmtR(custo)}</span></div>
+    </div>`;
+
+  if (prenhez.length) {
+    fichaHTML += `<div class="ficha-section"><div class="ficha-titulo">Gestações</div>`;
+    prenhez.forEach(p => {
+      const espGest = a.especie==='egua'?340:283;
+      const parto = addDias(p.dataCobertura, espGest);
+      const diasGest = diasEntre(p.dataCobertura, hoje());
+      const pct = Math.min(100, Math.round(diasGest/espGest*100));
+      fichaHTML += `<div class="prenhez-card" style="margin-bottom:8px">
+        <div class="prenhez-animal">Cobertura: ${fmtData(p.dataCobertura)} · ${p.tipo}</div>
+        <div class="prenhez-info">Reprodutor: ${p.reprodutor||'—'} ${p.obs?'· '+p.obs:''}</div>
+        <div class="prenhez-parto">🗓️ Previsão de parto: ${fmtData(parto)} (${espGest}d de gestação)</div>
+        <div class="prenhez-prog"><div class="prenhez-prog-fill" style="width:${pct}%"></div></div>
+        <div style="font-size:11px;color:var(--texto3);margin-top:4px">${diasGest}d de gestação · ${pct}% concluído</div>
+        ${p.status==='ativa'?`<button class="btn btn-ghost" style="margin-top:8px;padding:5px 10px;font-size:11px" onclick="encerrarPrenhez('${p.id}')">Registrar Parto/Encerrar</button>`:'<span class="badge badge-gray">Encerrada</span>'}
+      </div>`;
+    });
+    fichaHTML += `</div>`;
+  }
+
+  if (saudes.length) {
+    fichaHTML += `<div class="ficha-section"><div class="ficha-titulo">Histórico de saúde</div>`;
+    saudes.slice(0,5).forEach(s => {
+      fichaHTML += `<div class="list-item"><div><div class="list-desc">${s.desc}</div><div class="list-sub">${s.tipo} · ${fmtData(s.data)}</div></div><span class="list-val" style="color:var(--danger)">${fmtR(s.custo)}</span></div>`;
+    });
+    fichaHTML += `</div>`;
+  }
+
+  if (tratos.length) {
+    fichaHTML += `<div class="ficha-section"><div class="ficha-titulo">Últimos tratos</div>`;
+    tratos.slice(0,5).forEach(t => {
+      fichaHTML += `<div class="list-item"><div><div class="list-desc">${t.itens?t.itens.map(i=>i.insumo+' '+i.qtd+'kg').join(', '):t.desc||'—'}</div><div class="list-sub">${fmtData(t.data)}</div></div><span class="list-val" style="color:var(--danger)">${fmtR(t.custo)}</span></div>`;
+    });
+    fichaHTML += `</div>`;
+  }
+
+  fichaHTML += `<button class="btn btn-ghost btn-full" style="margin-top:4px" onclick="fecharModal('modal-ficha')">Fechar</button>`;
+
+  document.getElementById('ficha-conteudo').innerHTML = fichaHTML;
+  abrirModal('modal-ficha');
+};
+
+// ─── NOVO ANIMAL ────────────────────────────────────────────
+window.abrirModalAnimal = function(id) {
+  document.getElementById('modal-animal-title').textContent = id ? 'Editar Animal' : 'Novo Animal';
+  document.getElementById('animal-edit-id').value = id || '';
+  document.getElementById('f-entrada').value = hoje();
+  if (!id) {
+    ['f-nome','f-raca','f-obs'].forEach(x=>document.getElementById(x).value='');
+    document.getElementById('f-valor').value='';
+    document.getElementById('f-peso').value='';
+    document.getElementById('f-especie').value='vaca';
+    document.getElementById('f-sexo').value='femea';
+  }
+  abrirModal('modal-animal');
+};
+
+window.atualizarEmoji = function() {};
+
+window.salvarAnimal = async function() {
+  if (!lockBtn('btn-salvar-animal')) return;
+  const nome = document.getElementById('f-nome').value.trim();
+  if (!nome) { toast('Informe o nome do animal','error'); unlockBtn('btn-salvar-animal'); return; }
+  const id = document.getElementById('animal-edit-id').value || uid();
+  const dados = {
+    id, nome,
+    especie: document.getElementById('f-especie').value,
+    raca: document.getElementById('f-raca').value.trim(),
+    sexo: document.getElementById('f-sexo').value,
+    dataEntrada: document.getElementById('f-entrada').value,
+    valorCompra: parseFloat(document.getElementById('f-valor').value)||0,
+    pesoEntrada: parseFloat(document.getElementById('f-peso').value)||0,
+    obs: document.getElementById('f-obs').value.trim(),
+    status: 'plantel'
+  };
+  const idx = DB.animais.findIndex(a=>a.id===id);
+  if (idx>=0) DB.animais[idx] = dados; else DB.animais.push(dados);
+  await salvarFirestore('animais', id, dados);
+  // lançar compra no financeiro
+  const finId = 'compra_'+id;
+  const fin = { id:finId, tipo:'despesa', categoria:'compra', descricao:'Compra: '+nome, valor:dados.valorCompra, data:dados.dataEntrada, animalId:id };
+  const fi = DB.financeiro.findIndex(f=>f.id===finId);
+  if (fi>=0) DB.financeiro[fi]=fin; else DB.financeiro.push(fin);
+  await salvarFirestore('financeiro', finId, fin);
+  fecharModal('modal-animal');
+  renderAnimais();
+  toast(nome+' salvo com sucesso!','success');
+};
+
+window.excluirAnimal = async function(id) {
+  const a = DB.animais.find(x=>x.id===id);
+  if (!a) return;
+  const ok = await confirmar('Excluir '+a.nome+'?','Todos os registros de trato, saúde e financeiro deste animal também serão removidos. Esta ação não pode ser desfeita.','🗑️');
+  if (!ok) return;
+  const relacionados = {
+    tratos: DB.tratos.filter(t=>t.animalId===id),
+    saude: DB.saude.filter(s=>s.animalId===id),
+    prenhez: DB.prenhez.filter(p=>p.animalId===id),
+    financeiro: DB.financeiro.filter(f=>f.animalId===id)
+  };
+  await deletarFirestore('animais',id);
+  for (const col of Object.keys(relacionados)) {
+    for (const r of relacionados[col]) await deletarFirestore(col, r.id);
+  }
+  DB.animais = DB.animais.filter(x=>x.id!==id);
+  DB.tratos = DB.tratos.filter(t=>t.animalId!==id);
+  DB.saude = DB.saude.filter(s=>s.animalId!==id);
+  DB.prenhez = DB.prenhez.filter(p=>p.animalId!==id);
+  DB.financeiro = DB.financeiro.filter(f=>f.animalId!==id);
+  renderAnimais(); renderFinanceiro(); atualizarBadgeSaude();
+  toast(a.nome+' excluído','info');
+};
+
+// ─── VENDA ──────────────────────────────────────────────────
+window.abrirVenda = function(id) {
+  const a = DB.animais.find(x=>x.id===id);
+  if (!a) return;
+  document.getElementById('venda-animal-id').value = id;
+  document.getElementById('v-data').value = hoje();
+  document.getElementById('v-valor').value = '';
+  document.getElementById('v-comprador').value = '';
+  const custo = custoAnimal(id);
+  const dias = diasEntre(a.dataEntrada, hoje());
+  document.getElementById('venda-resumo').innerHTML = `
+    <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px">
+      <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--creme);margin-bottom:8px">${ESPECIES[a.especie]} ${a.nome}</div>
+      <div class="list-item" style="padding:6px 0"><span class="list-desc">Dias no plantel</span><span>${dias}d</span></div>
+      <div class="list-item" style="padding:6px 0"><span class="list-desc">Custo total acumulado</span><span style="color:var(--danger);font-weight:500">${fmtR(custo)}</span></div>
+    </div>`;
+  document.getElementById('venda-resultado').innerHTML = '<span style="color:var(--texto3);font-size:13px">Informe o valor de venda para ver o resultado</span>';
+  abrirModal('modal-venda');
+};
+
+window.calcVenda = function() {
+  const id = document.getElementById('venda-animal-id').value;
+  const custo = custoAnimal(id);
+  const venda = parseFloat(document.getElementById('v-valor').value)||0;
+  const lucro = venda - custo;
+  document.getElementById('venda-resultado').innerHTML = `
+    <div class="list-item" style="padding:6px 0"><span class="list-desc">Valor de venda</span><span style="color:var(--success);font-weight:500">${fmtR(venda)}</span></div>
+    <div class="list-item" style="padding:6px 0"><span class="list-desc">Custo total</span><span style="color:var(--danger)">${fmtR(custo)}</span></div>
+    <div class="list-item" style="padding:6px 0;border-bottom:none"><span class="list-desc" style="font-weight:500">Resultado</span><span style="color:${lucro>=0?'var(--success)':'var(--danger)'};font-weight:500;font-size:15px">${fmtR(lucro)}</span></div>`;
+};
+
+window.confirmarVenda = async function() {
+  if (!lockBtn('btn-confirmar-venda')) return;
+  const id = document.getElementById('venda-animal-id').value;
+  const a = DB.animais.find(x=>x.id===id);
+  if (!a) return;
+  const valor = parseFloat(document.getElementById('v-valor').value)||0;
+  if (!valor) { toast('Informe o valor de venda','error'); unlockBtn('btn-confirmar-venda'); return; }
+  const ok = await confirmar('Confirmar venda de '+a.nome+'?', `Valor: ${fmtR(valor)} · Resultado: ${fmtR(valor-custoAnimal(id))}. O animal será arquivado em "Vendidos".`,'💰');
+  if (!ok) { unlockBtn('btn-confirmar-venda'); return; }
+  a.status = 'vendido';
+  a.dataSaida = document.getElementById('v-data').value;
+  a.valorVenda = valor;
+  a.comprador = document.getElementById('v-comprador').value.trim();
+  // remover prenhez ativa
+  DB.prenhez.filter(p=>p.animalId===id&&p.status==='ativa').forEach(async p => {
+    p.status='encerrada'; await salvarFirestore('prenhez',p.id,p);
+  });
+  await salvarFirestore('animais', id, a);
+  // lançar receita
+  const finId = 'venda_'+id+'_'+uid();
+  const fin = { id:finId, tipo:'receita', categoria:'venda', descricao:'Venda: '+a.nome, valor, data:a.dataSaida, animalId:id };
+  DB.financeiro.push(fin);
+  await salvarFirestore('financeiro', finId, fin);
+  fecharModal('modal-venda');
+  renderTudo();
+  toast('Venda de '+a.nome+' registrada!','success');
+};
+
+// ─── TRATO ──────────────────────────────────────────────────
+const INSUMOS_PRECO = { racao:2.80, silagem:0.45, feno:1.20, sal:3.50, suplemento:8.00, outro:1.00 };
+
+function renderTratoSelects() {
+  const sel = document.getElementById('trato-animal');
+  const ativos = DB.animais.filter(a=>a.status!=='vendido');
+  sel.innerHTML = ativos.length ? ativos.map(a=>`<option value="${a.id}">${ESPECIES[a.especie]} ${a.nome}</option>`).join('') : '<option>Nenhum animal</option>';
+}
+
+function renderTrato() {
+  renderTratoSelects();
+  document.getElementById('trato-data').value = hoje();
+  if (!tratoItens.length) addTratoItem();
+  renderTratoItens();
+  const hist = [...DB.tratos].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,15);
+  document.getElementById('hist-trato').innerHTML = hist.length ? hist.map(t => {
+    const a = DB.animais.find(x=>x.id===t.animalId);
+    const emoji = a ? ESPECIES[a.especie] : '🐾';
+    const nome = a ? a.nome : '—';
+    const desc = t.itens ? t.itens.map(i=>INSUMO_NOMES[i.insumo]||i.insumo+' '+i.qtd+'kg').join(', ') : t.desc||'—';
+    return `<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:10px">
+      <div style="font-size:22px">${emoji}</div>
+      <div style="flex:1">
+        <div style="font-weight:500;color:var(--creme)">${nome}</div>
+        <div style="font-size:12px;color:var(--texto2)">${desc}</div>
+        <div style="font-size:11px;color:var(--texto3)">${fmtData(t.data)}</div>
+      </div>
+      <div style="text-align:right">
+        <div style="color:var(--danger);font-weight:500">${fmtR(t.custo)}</div>
+        <button onclick="excluirTrato('${t.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:4px">✕ excluir</button>
+      </div>
+    </div>`;
+  }).join('') : '<div class="empty"><div class="empty-ico">🌾</div><div class="empty-txt">Nenhum trato registrado.</div></div>';
+}
+
+window.addTratoItem = function() {
+  tratoItens.push({ insumo:'racao', qtd:5 });
+  renderTratoItens();
+};
+
+function renderTratoItens() {
+  document.getElementById('trato-itens').innerHTML = tratoItens.map((it,i) => `
+    <div class="trato-item">
+      <select onchange="tratoItens[${i}].insumo=this.value;calcTratoTotal()" style="background:var(--bg3);border:none;color:var(--texto);font-size:13px;flex:1;padding:4px 0">
+        ${Object.entries(INSUMO_NOMES).map(([k,v])=>`<option value="${k}" ${it.insumo===k?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <input type="number" value="${it.qtd}" min="0.5" step="0.5" style="width:60px;background:transparent;border:none;color:var(--texto);font-size:13px;text-align:right" oninput="tratoItens[${i}].qtd=parseFloat(this.value)||0;calcTratoTotal()">
+      <span style="color:var(--texto3);font-size:12px">kg</span>
+      ${tratoItens.length>1?`<span class="trato-remove" onclick="removerTratoItem(${i})">✕</span>`:''}
+    </div>`).join('');
+  calcTratoTotal();
+}
+
+window.removerTratoItem = function(i) {
+  tratoItens.splice(i,1);
+  renderTratoItens();
+};
+
+function calcTratoTotal() {
+  let total = tratoItens.reduce((s,it) => {
+    const preco = INSUMOS_PRECO[it.insumo]||1;
+    return s + (it.qtd||0)*preco;
+  }, 0);
+  // descontar estoque disponível
+  document.getElementById('trato-total-preview').textContent = fmtR(total);
+}
+window.calcTratoTotal = calcTratoTotal;
+
+window.salvarTrato = async function() {
+  if (!lockBtn('btn-salvar-trato')) return;
+  const animalId = document.getElementById('trato-animal').value;
+  if (!animalId || !DB.animais.find(a=>a.id===animalId&&a.status!=='vendido')) {
+    toast('Selecione um animal','error'); unlockBtn('btn-salvar-trato'); return;
+  }
+  const data = document.getElementById('trato-data').value;
+  const itens = tratoItens.map(it=>({ insumo:it.insumo, qtd:it.qtd||0, preco:INSUMOS_PRECO[it.insumo]||1, subtotal:(it.qtd||0)*(INSUMOS_PRECO[it.insumo]||1) }));
+  const custo = itens.reduce((s,it)=>s+it.subtotal,0);
+  const id = uid();
+  const trato = { id, animalId, data, itens, custo, desc: itens.map(i=>INSUMO_NOMES[i.insumo]+' '+i.qtd+'kg').join(', ') };
+  DB.tratos.push(trato);
+  await salvarFirestore('tratos', id, trato);
+  // debitar estoque
+  for (const it of itens) {
+    const est = DB.estoque.find(e=>e.insumo===it.insumo);
+    if (est) { est.saldo = Math.max(0,(est.saldo||0)-it.qtd); await salvarFirestore('estoque',est.id,est); }
+  }
+  // lançar financeiro
+  const finId = 'trato_'+id;
+  const fin = { id:finId, tipo:'despesa', categoria:'trato', descricao:'Trato: '+nomeAnimal(animalId)+' ('+trato.desc+')', valor:custo, data, animalId };
+  DB.financeiro.push(fin);
+  await salvarFirestore('financeiro', finId, fin);
+  tratoItens = [{ insumo:'racao', qtd:5 }];
+  renderTrato(); renderEstoque(); renderFinanceiro();
+  toast('Trato registrado: '+fmtR(custo),'success');
+};
+
+window.excluirTrato = async function(id) {
+  const ok = await confirmar('Excluir este registro de trato?','O custo será removido da ficha do animal.','🗑️');
+  if (!ok) return;
+  DB.tratos = DB.tratos.filter(t=>t.id!==id);
+  DB.financeiro = DB.financeiro.filter(f=>f.id!=='trato_'+id);
+  await deletarFirestore('tratos',id);
+  await deletarFirestore('financeiro','trato_'+id);
+  renderTrato(); renderFinanceiro();
+  toast('Trato removido','info');
+};
+
+// ─── SAÚDE ──────────────────────────────────────────────────
+window.abrirModalSaude = function() {
+  const sel = document.getElementById('s-animal');
+  const ativos = DB.animais.filter(a=>a.status!=='vendido');
+  sel.innerHTML = ativos.map(a=>`<option value="${a.id}">${ESPECIES[a.especie]} ${a.nome}</option>`).join('');
+  document.getElementById('s-data').value = hoje();
+  ['s-desc','s-obs'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('s-custo').value='';
+  document.getElementById('s-proxima').value='';
+  abrirModal('modal-saude');
+};
+
+window.salvarSaude = async function() {
+  if (!lockBtn('btn-salvar-saude')) return;
+  const desc = document.getElementById('s-desc').value.trim();
+  if (!desc) { toast('Informe a descrição','error'); unlockBtn('btn-salvar-saude'); return; }
+  const id = uid();
+  const dados = {
+    id,
+    animalId: document.getElementById('s-animal').value,
+    tipo: document.getElementById('s-tipo').value,
+    data: document.getElementById('s-data').value,
+    desc,
+    custo: parseFloat(document.getElementById('s-custo').value)||0,
+    proxima: document.getElementById('s-proxima').value,
+    obs: document.getElementById('s-obs').value.trim()
+  };
+  DB.saude.push(dados);
+  await salvarFirestore('saude', id, dados);
+  // lançar financeiro
+  const finId = 'saude_'+id;
+  const fin = { id:finId, tipo:'despesa', categoria:'saude', descricao:dados.tipo+': '+desc+' ('+nomeAnimal(dados.animalId)+')', valor:dados.custo, data:dados.data, animalId:dados.animalId };
+  DB.financeiro.push(fin);
+  await salvarFirestore('financeiro', finId, fin);
+  fecharModal('modal-saude');
+  renderSaude(); renderFinanceiro(); atualizarBadgeSaude();
+  toast('Registro de saúde salvo','success');
+};
+
+function renderSaude() {
+  const tab = innerTabAtual.saude;
+  const hoje_str = hoje();
+  if (tab === 'alertas') {
+    const proximas = DB.saude.filter(s => s.proxima && s.proxima >= hoje_str)
+      .sort((a,b)=>a.proxima.localeCompare(b.proxima));
+    const vencidas = DB.saude.filter(s => s.proxima && s.proxima < hoje_str);
+    let html = '';
+    if (vencidas.length) {
+      html += `<div class="fin-titulo" style="color:var(--danger)">⚠️ Vencidas (${vencidas.length})</div>`;
+      vencidas.forEach(s => {
+        html += `<div class="prenhez-card" style="background:var(--danger-bg);border-color:rgba(224,85,85,.3)">
+          <div class="prenhez-animal">${nomeAnimal(s.animalId)} — ${s.desc}</div>
+          <div class="prenhez-info">${s.tipo} · Aplicado: ${fmtData(s.data)}</div>
+          <div style="color:var(--danger);font-size:13px;font-weight:500;margin-top:4px">Próxima dose venceu em ${fmtData(s.proxima)}</div>
+          <button onclick="excluirSaude('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:6px">✕ excluir</button>
+        </div>`;
+      });
+    }
+    if (proximas.length) {
+      html += `<div class="fin-titulo" style="margin-top:12px">📅 Próximas doses</div>`;
+      proximas.forEach(s => {
+        const dias = diasEntre(hoje_str, s.proxima);
+        html += `<div class="prenhez-card">
+          <div class="prenhez-animal">${nomeAnimal(s.animalId)} — ${s.desc}</div>
+          <div class="prenhez-info">${s.tipo} · Aplicado: ${fmtData(s.data)}</div>
+          <div class="prenhez-parto">Próxima dose: ${fmtData(s.proxima)} (em ${dias} dias)</div>
+        </div>`;
+      });
+    }
+    if (!vencidas.length && !proximas.length) html = '<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">Nenhum alerta de saúde.</div></div>';
+    document.getElementById('saude-conteudo').innerHTML = html;
+  } else {
+    const hist = [...DB.saude].sort((a,b)=>b.data.localeCompare(a.data));
+    document.getElementById('saude-conteudo').innerHTML = hist.length ? hist.map(s => `
+      <div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:10px">
+        <div style="font-size:22px">${s.tipo==='vacina'?'💉':s.tipo==='medicamento'?'💊':s.tipo==='exame'?'🔬':'🩺'}</div>
+        <div style="flex:1">
+          <div style="font-weight:500;color:var(--creme)">${nomeAnimal(s.animalId)}</div>
+          <div style="font-size:12px;color:var(--texto2)">${s.desc} ${s.obs?'· '+s.obs:''}</div>
+          <div style="font-size:11px;color:var(--texto3)">${fmtData(s.data)}${s.proxima?' · próx: '+fmtData(s.proxima):''}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="color:var(--danger);font-weight:500">${fmtR(s.custo)}</div>
+          <button onclick="excluirSaude('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:4px">✕</button>
+        </div>
+      </div>`).join('') : '<div class="empty"><div class="empty-ico">💉</div><div class="empty-txt">Nenhum registro de saúde.</div></div>';
+  }
+}
+
+window.excluirSaude = async function(id) {
+  const ok = await confirmar('Excluir registro de saúde?','O custo será removido do financeiro.','🗑️');
+  if (!ok) return;
+  DB.saude = DB.saude.filter(s=>s.id!==id);
+  DB.financeiro = DB.financeiro.filter(f=>f.id!=='saude_'+id);
+  await deletarFirestore('saude',id);
+  await deletarFirestore('financeiro','saude_'+id);
+  renderSaude(); renderFinanceiro(); atualizarBadgeSaude();
+  toast('Registro removido','info');
+};
+
+function atualizarBadgeSaude() {
+  const hoje_str = hoje();
+  const vencidas = DB.saude.filter(s=>s.proxima&&s.proxima<hoje_str).length;
+  const badge = document.getElementById('badge-saude');
+  if (vencidas>0) { badge.textContent=vencidas; badge.style.display=''; }
+  else badge.style.display='none';
+}
+
+// ─── CALENDÁRIO ─────────────────────────────────────────────
+window.navCal = function(dir) { calMes+=dir; if(calMes>11){calMes=0;calAno++;}if(calMes<0){calMes=11;calAno--;} renderCalendario(); };
+
+function renderCalendario() {
+  const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  document.getElementById('cal-month-label').textContent = meses[calMes]+' '+calAno;
+
+  const primeiro = new Date(calAno,calMes,1);
+  const ultimo = new Date(calAno,calMes+1,0);
+  const inicioSem = primeiro.getDay();
+  const hoje_str = hoje();
+
+  // coletar eventos do mês
+  const eventos = {};
+  DB.prenhez.filter(p=>p.status==='ativa').forEach(p => {
+    const a = DB.animais.find(x=>x.id===p.animalId);
+    const espGest = (a&&a.especie==='egua')?340:283;
+    const parto = addDias(p.dataCobertura, espGest);
+    if (parto.startsWith(calAno+'-'+(calMes+1<10?'0':'')+(calMes+1))) {
+      const dia = parseInt(parto.slice(8));
+      if (!eventos[dia]) eventos[dia]=[];
+      eventos[dia].push({ tipo:'parto', animal:a?a.nome:'?', data:parto, prenId:p.id });
+    }
+    const cob = p.dataCobertura;
+    if (cob.startsWith(calAno+'-'+(calMes+1<10?'0':'')+(calMes+1))) {
+      const dia = parseInt(cob.slice(8));
+      if (!eventos[dia]) eventos[dia]=[];
+      eventos[dia].push({ tipo:'cobertura', animal:a?a.nome:'?' });
+    }
+  });
+  DB.saude.filter(s=>s.proxima&&s.proxima.startsWith(calAno+'-'+(calMes+1<10?'0':'')+(calMes+1))).forEach(s => {
+    const dia = parseInt(s.proxima.slice(8));
+    if (!eventos[dia]) eventos[dia]=[];
+    eventos[dia].push({ tipo:'saude', animal:nomeAnimal(s.animalId), desc:s.desc });
+  });
+
+  let html = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<inicioSem;i++) html+=`<div class="cal-day other-month"></div>`;
+  for(let d=1;d<=ultimo.getDate();d++) {
+    const dataStr = calAno+'-'+(calMes+1<10?'0':'')+(calMes+1)+'-'+(d<10?'0':'')+d;
+    const isHoje = dataStr===hoje_str;
+    const ev = eventos[d];
+    html += `<div class="cal-day ${isHoje?'today':''} ${ev?'has-event':''}" ${ev?`onclick="verEventoCal('${dataStr}')"`:''}>${d}</div>`;
+  }
+  document.getElementById('cal-grid').innerHTML = html;
+
+  // prenhez ativas
+  const prenhezAtivas = DB.prenhez.filter(p=>p.status==='ativa');
+  if (!prenhezAtivas.length) {
+    document.getElementById('prenhez-list').innerHTML = '<div class="empty"><div class="empty-ico">🤰</div><div class="empty-txt">Nenhuma gestação ativa.<br>Toque em + Prenhez para registrar.</div></div>';
+    return;
+  }
+  document.getElementById('prenhez-list').innerHTML = prenhezAtivas.map(p => {
+    const a = DB.animais.find(x=>x.id===p.animalId);
+    const espGest = (a&&a.especie==='egua')?340:283;
+    const parto = addDias(p.dataCobertura, espGest);
+    const diasGest = diasEntre(p.dataCobertura, hoje_str);
+    const pct = Math.min(100,Math.round(diasGest/espGest*100));
+    const diasFaltam = diasEntre(hoje_str, parto);
+    return `<div class="prenhez-card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div class="prenhez-animal">${a?ESPECIES[a.especie]:''} ${a?a.nome:'—'}</div>
+        <button onclick="excluirPrenhez('${p.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:14px">✕</button>
+      </div>
+      <div class="prenhez-info">Cobertura: ${fmtData(p.dataCobertura)} · ${p.tipo}${p.reprodutor?' · '+p.reprodutor:''}</div>
+      <div class="prenhez-parto">🗓️ Previsão de parto: ${fmtData(parto)} (${diasFaltam>0?'em '+diasFaltam+'d':'hoje/passado'})</div>
+      <div class="prenhez-prog"><div class="prenhez-prog-fill" style="width:${pct}%"></div></div>
+      <div style="font-size:11px;color:var(--texto3);margin-top:4px">${diasGest}d de gestação · ${pct}% · ${espGest}d total (${a&&a.especie==='egua'?'Égua':'Bovina'})</div>
+    </div>`;
+  }).join('');
+}
+
+window.verEventoCal = function(dataStr) {
+  const eventos = [];
+  DB.prenhez.filter(p=>p.status==='ativa').forEach(p => {
+    const a = DB.animais.find(x=>x.id===p.animalId);
+    const espGest = (a&&a.especie==='egua')?340:283;
+    const parto = addDias(p.dataCobertura, espGest);
+    if (parto===dataStr) eventos.push({ tipo:'Previsão de Parto', animal:a?a.nome:'?', emoji:'🐣', cor:'var(--dourado)' });
+    if (p.dataCobertura===dataStr) eventos.push({ tipo:'Data de Cobertura', animal:a?a.nome:'?', emoji:'❤️', cor:'var(--verde-super)' });
+  });
+  DB.saude.filter(s=>s.proxima===dataStr).forEach(s => {
+    eventos.push({ tipo:s.desc, animal:nomeAnimal(s.animalId), emoji:'💉', cor:'var(--danger)' });
+  });
+  document.getElementById('evento-cal-title').textContent = 'Eventos de '+fmtData(dataStr);
+  document.getElementById('evento-cal-conteudo').innerHTML = eventos.map(e=>`
+    <div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--bg3);border-radius:var(--radius-sm);margin-bottom:8px">
+      <div style="font-size:24px">${e.emoji}</div>
+      <div><div style="font-weight:500;color:${e.cor}">${e.tipo}</div><div style="font-size:13px;color:var(--texto2)">${e.animal}</div></div>
+    </div>`).join('');
+  abrirModal('modal-evento-cal');
+};
+
+// ─── PRENHEZ ────────────────────────────────────────────────
+window.abrirModalPrenhez = function() {
+  const fêmeas = DB.animais.filter(a=>a.status!=='vendido'&&(a.sexo==='femea'||['vaca','egua'].includes(a.especie)));
+  const sel = document.getElementById('p-animal');
+  sel.innerHTML = fêmeas.length ? fêmeas.map(a=>`<option value="${a.id}">${ESPECIES[a.especie]} ${a.nome}</option>`).join('') : '<option value="">Nenhuma fêmea disponível</option>';
+  document.getElementById('p-cobertura').value = hoje();
+  ['p-reprodutor','p-obs'].forEach(x=>document.getElementById(x).value='');
+  calcParto();
+  abrirModal('modal-prenhez');
+};
+
+window.calcParto = function() {
+  const id = document.getElementById('p-animal').value;
+  const cob = document.getElementById('p-cobertura').value;
+  const a = DB.animais.find(x=>x.id===id);
+  const espGest = (a&&a.especie==='egua')?340:283;
+  const label = (a&&a.especie==='egua')?'Égua (340 dias)':'Bovina (283 dias)';
+  if (cob) {
+    const parto = addDias(cob, espGest);
+    document.getElementById('p-parto-preview').textContent = `🗓️ Previsão de parto: ${fmtData(parto)} (${label})`;
+  }
+};
+document.getElementById('p-animal').addEventListener('change', window.calcParto);
+
+window.salvarPrenhez = async function() {
+  if (!lockBtn('btn-salvar-prenhez')) return;
+  const animalId = document.getElementById('p-animal').value;
+  if (!animalId) { toast('Selecione o animal','error'); unlockBtn('btn-salvar-prenhez'); return; }
+  const id = uid();
+  const dados = {
+    id, animalId,
+    dataCobertura: document.getElementById('p-cobertura').value,
+    tipo: document.getElementById('p-tipo').value,
+    reprodutor: document.getElementById('p-reprodutor').value.trim(),
+    obs: document.getElementById('p-obs').value.trim(),
+    status: 'ativa'
+  };
+  DB.prenhez.push(dados);
+  await salvarFirestore('prenhez', id, dados);
+  fecharModal('modal-prenhez');
+  renderCalendario(); renderAnimais();
+  toast('Prenhez registrada!','success');
+};
+
+window.excluirPrenhez = async function(id) {
+  const ok = await confirmar('Excluir registro de prenhez?','O calendário será atualizado automaticamente.','🗑️');
+  if (!ok) return;
+  DB.prenhez = DB.prenhez.filter(p=>p.id!==id);
+  await deletarFirestore('prenhez',id);
+  renderCalendario(); renderAnimais();
+  toast('Prenhez removida','info');
+};
+
+window.encerrarPrenhez = async function(id) {
+  const ok = await confirmar('Encerrar esta gestação?','Marque como encerrada após o parto ou em caso de perda.','🐣');
+  if (!ok) return;
+  const p = DB.prenhez.find(x=>x.id===id);
+  if (p) { p.status='encerrada'; await salvarFirestore('prenhez',id,p); }
+  fecharModal('modal-ficha');
+  renderCalendario(); renderAnimais();
+  toast('Gestação encerrada','info');
+};
+
+// ─── ESTOQUE ────────────────────────────────────────────────
+function renderEstoque() {
+  const totalVal = DB.estoque.reduce((s,e)=>(s+(e.saldo||0)*e.custo_kg),0);
+  const baixos = DB.estoque.filter(e=>e.saldo<e.minimo).length;
+  document.getElementById('metrics-estoque').innerHTML = `
+    <div class="metric"><div class="metric-label">Valor em estoque</div><div class="metric-val">${fmtR(totalVal)}</div></div>
+    <div class="metric"><div class="metric-label">Itens abaixo mínimo</div><div class="metric-val ${baixos?'red':''}">${baixos}</div></div>`;
+  if (!DB.estoque.length) {
+    document.getElementById('lista-estoque').innerHTML = '<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">Nenhum insumo cadastrado.<br>Toque em + Entrada para adicionar.</div></div>';
+    return;
+  }
+  document.getElementById('lista-estoque').innerHTML = DB.estoque.map(e => {
+    const pct = e.minimo ? Math.min(100,Math.round((e.saldo/e.minimo)*50)) : 50;
+    const baixo = e.saldo < e.minimo;
+    return `<div class="est-row">
+      <div class="est-header">
+        <div class="est-emoji">${INSUMO_EMOJI[e.insumo]||'📦'}</div>
+        <div class="est-nome">${INSUMO_NOMES[e.insumo]||e.insumo}</div>
+        <div class="est-saldo" style="color:${baixo?'var(--danger)':''}">${(e.saldo||0).toFixed(1)} kg</div>
+        <button onclick="excluirEstoque('${e.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:13px">✕</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--texto2)">
+        <span>Custo/kg: R$ ${(e.custo_kg||0).toFixed(2)}</span>
+        <span>Valor: ${fmtR((e.saldo||0)*e.custo_kg)}</span>
+      </div>
+      <div class="est-prog" style="margin-top:6px"><div class="est-prog-fill" style="width:${pct}%;background:${baixo?'var(--danger)':'var(--success)'}"></div></div>
+      ${baixo?`<div style="font-size:11px;color:var(--danger);margin-top:3px">⚠️ Abaixo do mínimo (${e.minimo} kg)</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+window.abrirModalEstoque = function() {
+  ['e-qtd','e-valor','e-fornecedor'].forEach(x=>document.getElementById(x).value='');
+  document.getElementById('e-insumo').value='racao';
+  document.getElementById('e-data').value=hoje();
+  document.getElementById('e-custo-kg').textContent='Custo por kg: —';
+  abrirModal('modal-estoque');
+};
+
+window.calcEstoque = function() {
+  const qtd = parseFloat(document.getElementById('e-qtd').value)||0;
+  const val = parseFloat(document.getElementById('e-valor').value)||0;
+  document.getElementById('e-custo-kg').textContent = qtd&&val ? 'Custo por kg: R$ '+(val/qtd).toFixed(2) : 'Custo por kg: —';
+};
+
+window.salvarEstoque = async function() {
+  if (!lockBtn('btn-salvar-estoque')) return;
+  const qtd = parseFloat(document.getElementById('e-qtd').value)||0;
+  const val = parseFloat(document.getElementById('e-valor').value)||0;
+  if (!qtd) { toast('Informe a quantidade','error'); unlockBtn('btn-salvar-estoque'); return; }
+  const insumo = document.getElementById('e-insumo').value;
+  const custo_kg = qtd ? val/qtd : 0;
+  // atualizar ou criar estoque do insumo
+  let est = DB.estoque.find(e=>e.insumo===insumo);
+  if (est) {
+    // média ponderada de preço
+    const saldoAnt = est.saldo||0;
+    const val_total = saldoAnt*est.custo_kg + qtd*custo_kg;
+    est.saldo = saldoAnt + qtd;
+    est.custo_kg = est.saldo ? val_total/est.saldo : custo_kg;
+    await salvarFirestore('estoque', est.id, est);
+  } else {
+    const id = uid();
+    est = { id, insumo, saldo: qtd, custo_kg, minimo: 50 };
+    DB.estoque.push(est);
+    await salvarFirestore('estoque', id, est);
+  }
+  // lançar no financeiro
+  if (val>0) {
+    const finId = 'estoque_'+uid();
+    const fin = { id:finId, tipo:'despesa', categoria:'estoque', descricao:'Compra: '+INSUMO_NOMES[insumo]+' '+qtd+'kg', valor:val, data:document.getElementById('e-data').value };
+    DB.financeiro.push(fin);
+    await salvarFirestore('financeiro', finId, fin);
+  }
+  // atualizar preco padrao do insumo para calculos de trato
+  INSUMOS_PRECO[insumo] = custo_kg || INSUMOS_PRECO[insumo];
+  fecharModal('modal-estoque');
+  renderEstoque(); renderFinanceiro();
+  toast('Estoque atualizado!','success');
+};
+
+window.excluirEstoque = async function(id) {
+  const ok = await confirmar('Excluir este item do estoque?','O saldo será removido.','🗑️');
+  if (!ok) return;
+  DB.estoque = DB.estoque.filter(e=>e.id!==id);
+  await deletarFirestore('estoque',id);
+  renderEstoque();
+  toast('Item removido','info');
+};
+
+// ─── FINANCEIRO ─────────────────────────────────────────────
+function renderFinanceiro() {
+  const despesas = DB.financeiro.filter(f=>f.tipo==='despesa');
+  const receitas = DB.financeiro.filter(f=>f.tipo==='receita');
+  const totalDesp = despesas.reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
+  const totalRec = receitas.reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
+  const lucro = totalRec - totalDesp;
+
+  document.getElementById('metrics-fin').innerHTML = `
+    <div class="metric"><div class="metric-label">Total receitas</div><div class="metric-val green">${fmtR(totalRec)}</div></div>
+    <div class="metric"><div class="metric-label">Total despesas</div><div class="metric-val red">${fmtR(totalDesp)}</div></div>
+    <div class="metric"><div class="metric-label">Lucro líquido</div><div class="metric-val ${lucro>=0?'green':'red'}">${fmtR(lucro)}</div></div>
+    <div class="metric"><div class="metric-label">Margem</div><div class="metric-val ${lucro>=0?'green':'red'}">${totalRec?Math.round(lucro/totalRec*100):0}%</div></div>`;
+
+  const tab = innerTabAtual.fin;
+  const lista = tab==='despesas' ? despesas : receitas;
+  const sorted = [...lista].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+  document.getElementById('fin-conteudo').innerHTML = sorted.length ? sorted.map(f=>`
+    <div class="list-item">
+      <div><div class="list-desc">${f.descricao}</div><div class="list-sub">${fmtData(f.data)} · ${f.categoria||''}</div></div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span class="list-val" style="color:${f.tipo==='receita'?'var(--success)':'var(--danger)'}">${fmtR(f.valor)}</span>
+        <button onclick="excluirFinanceiro('${f.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:13px">✕</button>
+      </div>
+    </div>`).join('') : `<div class="empty" style="padding:20px"><div class="empty-txt">Nenhum registro.</div></div>`;
+
+  // por animal
+  const porAnimal = DB.animais.map(a => ({
+    a,
+    custo: custoAnimal(a.id),
+    receita: a.status==='vendido' ? (parseFloat(a.valorVenda)||0) : 0
+  })).filter(x=>x.custo>0||x.receita>0).sort((a,b)=>b.custo-a.custo);
+
+  document.getElementById('fin-por-animal').innerHTML = porAnimal.length ? porAnimal.map(x=>`
+    <div class="list-item">
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="font-size:18px">${ESPECIES[x.a.especie]||'🐾'}</span>
+        <div><div class="list-desc">${x.a.nome}</div><div class="list-sub">${x.a.especie}${x.a.status==='vendido'?' · Vendido':''}</div></div>
+      </div>
+      <div style="text-align:right">
+        <div style="color:var(--danger);font-size:13px;font-weight:500">${fmtR(x.custo)}</div>
+        ${x.receita?`<div style="color:var(--success);font-size:12px">${fmtR(x.receita)}</div>`:''}
+      </div>
+    </div>`).join('') : '<div class="empty" style="padding:20px"><div class="empty-txt">Sem dados.</div></div>';
+}
+
+window.excluirFinanceiro = async function(id) {
+  const ok = await confirmar('Excluir este lançamento?','Esta ação não pode ser desfeita.','🗑️');
+  if (!ok) return;
+  DB.financeiro = DB.financeiro.filter(f=>f.id!==id);
+  await deletarFirestore('financeiro',id);
+  renderFinanceiro();
+  toast('Lançamento removido','info');
+};
+
+// ─── INIT ────────────────────────────────────────────────────
+function inicializarCampos() {
+  document.getElementById('f-entrada').value = hoje();
+  document.getElementById('trato-data').value = hoje();
+  tratoItens = [{ insumo:'racao', qtd:5 }];
+  renderTratoItens();
+}
+
+// PWA
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+
+onAuthStateChanged(auth, async (user) => {
+  document.getElementById('splash').classList.add('hide');
+  setTimeout(() => { const sp = document.getElementById('splash'); if (sp) sp.remove(); }, 600);
+
+  if (!user) {
+    currentUser = null;
+    resetDB();
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+    return;
+  }
+
+  currentUser = user;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  inicializarCampos();
+  try {
+    await carregarTudo();
+  } catch(e) {
+    toast('Erro ao iniciar: '+e.message, 'error');
+    renderTudo();
+  }
+});
+
+</script>
+</body>
+</html>
