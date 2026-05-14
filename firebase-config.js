@@ -1,10 +1,8 @@
 const firebaseConfig = {
-  apiKey: "COLOQUE_SUA_API_KEY",
-  authDomain: "COLOQUE_SEU_AUTH_DOMAIN",
-  projectId: "COLOQUE_SEU_PROJECT_ID",
-  storageBucket: "COLOQUE_SEU_STORAGE_BUCKET",
-  messagingSenderId: "COLOQUE_SEU_MESSAGING_SENDER_ID",
-  appId: "COLOQUE_SEU_APP_ID"
+  apiKey: "AIzaSyBxi10ngToTMKBVIRcdC6ljcWXuwxWTaTU",
+  authDomain: "bovinos-e-equinos-gestao.firebaseapp.com",
+  projectId: "bovinos-e-equinos-gestao",
+  storageBucket: "bovinos-e-equinos-gestao.firebasestorage.app",
+  messagingSenderId: "770846510881",
+  appId: "1:770846510881:web:fa26e0bc40cfab26fe3860"
 };
-
-export default firebaseConfig;
