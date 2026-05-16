@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
@@ -283,6 +283,20 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
   .est-saldo{margin-left:auto}
 }
 
+/* TUTORIAL */
+#tutorial-overlay{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:400;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .25s}
+#tutorial-overlay.open{opacity:1;pointer-events:all}
+.tutorial-box{background:var(--bg2);border:1px solid var(--borda2);border-radius:var(--radius-lg);padding:24px 20px;max-width:400px;width:100%;max-height:90vh;overflow-y:auto}
+.tutorial-titulo{font-family:'Fraunces',serif;font-size:20px;color:var(--creme);margin-bottom:4px}
+.tutorial-sub{font-size:12px;color:var(--texto3);margin-bottom:18px}
+.tutorial-item{display:flex;align-items:flex-start;gap:12px;margin-bottom:11px;padding-bottom:11px;border-bottom:1px solid var(--borda)}
+.tutorial-item:last-of-type{border-bottom:none;margin-bottom:0;padding-bottom:0}
+.tutorial-item-ico{font-size:20px;flex-shrink:0;width:28px;text-align:center;margin-top:1px}
+.tutorial-item-nome{font-size:14px;font-weight:500;color:var(--texto);margin-bottom:2px}
+.tutorial-item-desc{font-size:12px;color:var(--texto2);line-height:1.4}
+.tutorial-btns{display:flex;gap:10px;margin-top:20px}
+.tutorial-btns .btn{flex:1;font-size:12px}
+
 </style>
 </head>
 <body>
@@ -329,29 +343,33 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
   </div>
   <nav class="nav">
     <button class="nav-btn active" onclick="setPage('animais',this)">
-      <div class="nav-ico">🐄</div>
+      <div class="nav-ico">&#128004;</div>
       <div class="nav-label">Animais</div>
     </button>
     <button class="nav-btn" onclick="setPage('trato',this)">
-      <div class="nav-ico">🌾</div>
+      <div class="nav-ico">&#127806;</div>
       <div class="nav-label">Trato</div>
     </button>
     <button class="nav-btn" onclick="setPage('saude',this)">
-      <div class="nav-ico">💉</div>
+      <div class="nav-ico">&#128137;</div>
       <div class="nav-label">Saúde</div>
       <div class="nav-badge" id="badge-saude" style="display:none"></div>
     </button>
     <button class="nav-btn" onclick="setPage('calendario',this)">
-      <div class="nav-ico">📅</div>
+      <div class="nav-ico">&#128197;</div>
       <div class="nav-label">Calendário</div>
     </button>
     <button class="nav-btn" onclick="setPage('estoque',this)">
-      <div class="nav-ico">📦</div>
+      <div class="nav-ico">&#128230;</div>
       <div class="nav-label">Estoque</div>
     </button>
     <button class="nav-btn" onclick="setPage('financeiro',this)">
-      <div class="nav-ico">💰</div>
+      <div class="nav-ico">&#128176;</div>
       <div class="nav-label">Financeiro</div>
+    </button>
+    <button class="nav-btn" onclick="abrirTutorial()">
+      <div class="nav-ico">&#10067;</div>
+      <div class="nav-label">Ajuda</div>
     </button>
   </nav>
 
@@ -362,6 +380,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
       <div class="inner-tabs">
         <div class="inner-tab active" onclick="setInnerTab('animais','plantel',this)">No Plantel</div>
         <div class="inner-tab" onclick="setInnerTab('animais','vendidos',this)">Vendidos</div>
+        <div class="inner-tab" onclick="setInnerTab('animais','mortos',this)">Mortos</div>
+        <div class="inner-tab" onclick="setInnerTab('animais','inativos',this)">Inativos</div>
       </div>
       <div class="section-title">
         <span id="animais-tab-title">Plantel</span>
@@ -392,7 +412,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
         <button class="btn btn-ghost btn-full" style="margin-bottom:12px;font-size:12px" onclick="addTratoItem()">+ Adicionar ingrediente</button>
         <div class="form-group">
           <label class="form-label">Observações (opcional)</label>
-          <input type="text" class="form-control" id="trato-obs" placeholder="Ex: trato da manhã, animais em bom estado...">
+          <input type="text" class="form-control" id="trato-obs" placeholder="Ex: trato da manh&atilde;, animais em bom estado...">
         </div>
         <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
@@ -408,7 +428,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
       <div id="hist-trato"></div>
     </div>
 
-    <!-- SAÚDE -->
+    <!-- SAaDE -->
     <div class="page" id="pg-saude">
       <div class="section-title">
         Saúde
@@ -427,7 +447,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
         Calendário
         <button class="btn btn-gold" onclick="abrirModalPrenhez()">+ Prenhez</button>
       </div>
-      <div class="card" style="margin-bottom:12px">
+      <div class="card" style="margin-bottom:12px;display:none">
         <div class="cal-nav">
           <button class="cal-nav-btn" onclick="navCal(-1)">&#8592;</button>
           <div class="cal-month" id="cal-month-label"></div>
@@ -435,7 +455,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
         </div>
         <div class="cal-grid" id="cal-grid"></div>
       </div>
-      <div class="section-title">Gestações Ativas</div>
+      <div class="section-title">Eventos</div>
       <div id="prenhez-list"></div>
     </div>
 
@@ -469,6 +489,60 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
 
 </div>
 
+<!-- TUTORIAL -->
+<div id="tutorial-overlay">
+  <div class="tutorial-box">
+    <div class="tutorial-titulo">Bem-vindo ao sistema!</div>
+    <div class="tutorial-sub">Veja rapidamente o que cada seção faz</div>
+    <div class="tutorial-item">
+      <div class="tutorial-item-ico">&#128004;</div>
+      <div>
+        <div class="tutorial-item-nome">Animais</div>
+        <div class="tutorial-item-desc">Cadastre e consulte todos os animais do plantel.</div>
+      </div>
+    </div>
+    <div class="tutorial-item">
+      <div class="tutorial-item-ico">&#127806;</div>
+      <div>
+        <div class="tutorial-item-nome">Trato</div>
+        <div class="tutorial-item-desc">Registre o trato diário com um ou mais ingredientes.</div>
+      </div>
+    </div>
+    <div class="tutorial-item">
+      <div class="tutorial-item-ico">&#128137;</div>
+      <div>
+        <div class="tutorial-item-nome">Saúde</div>
+        <div class="tutorial-item-desc">Registre vacinas, vermífugos e cuidados veterinários.</div>
+      </div>
+    </div>
+    <div class="tutorial-item">
+      <div class="tutorial-item-ico">&#128197;</div>
+      <div>
+        <div class="tutorial-item-nome">Calendário</div>
+        <div class="tutorial-item-desc">Acompanhe gestações, partos previstos e eventos.</div>
+      </div>
+    </div>
+    <div class="tutorial-item">
+      <div class="tutorial-item-ico">&#128230;</div>
+      <div>
+        <div class="tutorial-item-nome">Estoque</div>
+        <div class="tutorial-item-desc">Controle entradas, saídas e consumo de insumos.</div>
+      </div>
+    </div>
+    <div class="tutorial-item">
+      <div class="tutorial-item-ico">&#128176;</div>
+      <div>
+        <div class="tutorial-item-nome">Financeiro</div>
+        <div class="tutorial-item-desc">Acompanhe receitas, despesas e resultado geral.</div>
+      </div>
+    </div>
+    <div class="tutorial-btns">
+      <button class="btn btn-ghost" onclick="fecharTutorial()">Pular</button>
+      <button class="btn btn-primary" onclick="fecharTutorialSempre()">Não mostrar novamente</button>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST -->
 <div class="toast-wrap" id="toast-wrap"></div>
 
@@ -494,7 +568,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
     <div class="form-row cols2">
       <div class="form-group">
         <label class="form-label">Nome</label>
-        <input class="form-control" id="f-nome" placeholder="Ex: Trovão">
+        <input class="form-control" id="f-nome" placeholder="Ex: Trovo">
       </div>
       <div class="form-group">
         <label class="form-label">Espécie</label>
@@ -539,9 +613,9 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
     <div class="form-group">
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--texto2)">
         <input type="checkbox" id="f-inicial">
-        InventÃ¡rio / patrimÃ´nio inicial
+        Inventário / patrimônio inicial
       </label>
-      <div style="font-size:11px;color:var(--texto3);margin-top:4px">Use para animal que jÃ¡ existia antes do sistema. O valor entra no patrimÃ´nio, sem virar despesa mensal.</div>
+      <div style="font-size:11px;color:var(--texto3);margin-top:4px">Use para animal que j&aacute; existia antes do sistema. O valor entra no patrimônio, sem virar despesa mensal.</div>
     </div>
     <div class="form-row cols2">
       <div class="form-group">
@@ -555,7 +629,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
     </div>
     <div class="form-group">
       <label class="form-label">Observações</label>
-      <textarea class="form-control" id="f-obs" rows="2" placeholder="Detalhes, procedência..."></textarea>
+      <textarea class="form-control" id="f-obs" rows="2" placeholder="Detalhes, procedncia..."></textarea>
     </div>
     <button class="btn btn-primary btn-full" id="btn-salvar-animal" onclick="salvarAnimal()">Salvar Animal</button>
     <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-animal')">Cancelar</button>
@@ -591,9 +665,34 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
         <input class="form-control" id="v-comprador" placeholder="Nome">
       </div>
     </div>
+    <div class="form-group">
+      <label class="form-label">Observação (opcional)</label>
+      <input class="form-control" id="v-obs" placeholder="Detalhes da venda...">
+    </div>
     <div id="venda-resultado" style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px;margin-bottom:14px"></div>
     <button class="btn btn-primary btn-full" id="btn-confirmar-venda" onclick="confirmarVenda()">Confirmar Venda</button>
     <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-venda')">Cancelar</button>
+  </div>
+</div>
+
+<!-- MODAL STATUS ANIMAL -->
+<div class="modal-overlay" id="modal-status-animal">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="status-animal-title">Alterar Status</div>
+    <input type="hidden" id="status-animal-id">
+    <input type="hidden" id="status-animal-novo">
+    <div id="status-animal-resumo" style="margin-bottom:14px"></div>
+    <div class="form-group">
+      <label class="form-label">Data</label>
+      <input type="date" class="form-control" id="status-animal-data">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Motivo / observação (opcional)</label>
+      <input class="form-control" id="status-animal-obs" placeholder="Ex: bito, pausa reprodutiva, manejo...">
+    </div>
+    <button class="btn btn-primary btn-full" id="btn-confirmar-status-animal" onclick="confirmarStatusAnimal()">Confirmar Status</button>
+    <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-status-animal')">Cancelar</button>
   </div>
 </div>
 
@@ -637,8 +736,8 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Veterinário / observações</label>
-      <input class="form-control" id="s-obs" placeholder="Nome do vet, observações...">
+      <label class="form-label">Veterinário / observaes</label>
+      <input class="form-control" id="s-obs" placeholder="Nome do vet, observaes...">
     </div>
     <button class="btn btn-primary btn-full" id="btn-salvar-saude" onclick="salvarSaude()">Salvar Registro</button>
     <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-saude')">Cancelar</button>
@@ -708,7 +807,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
         <input type="number" class="form-control" id="e-valor" placeholder="Ex: 560" oninput="calcEstoque()">
       </div>
     </div>
-    <div id="e-custo-kg" style="font-size:12px;color:var(--texto2);margin-bottom:12px;padding:8px 10px;background:var(--bg3);border-radius:var(--radius-sm)">Custo por kg: —</div>
+    <div id="e-custo-kg" style="font-size:12px;color:var(--texto2);margin-bottom:12px;padding:8px 10px;background:var(--bg3);border-radius:var(--radius-sm)">Custo por kg: &mdash;</div>
     <div class="form-group">
       <label class="form-label">Data da compra</label>
       <input type="date" class="form-control" id="e-data">
@@ -716,17 +815,17 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
     <div class="form-group">
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--texto2)">
         <input type="checkbox" id="e-inicial">
-        InventÃ¡rio / patrimÃ´nio inicial
+        Inventário / patrimônio inicial
       </label>
-      <div style="font-size:11px;color:var(--texto3);margin-top:4px">Use para saldo que jÃ¡ existia antes do sistema. Atualiza o estoque e patrimÃ´nio, sem criar despesa financeira.</div>
+      <div style="font-size:11px;color:var(--texto3);margin-top:4px">Use para saldo que j&aacute; existia antes do sistema. Atualiza o estoque e patrimônio, sem criar despesa financeira.</div>
     </div>
     <div class="form-group">
       <label class="form-label">Fornecedor</label>
       <input class="form-control" id="e-fornecedor" placeholder="Nome do fornecedor">
     </div>
     <div class="form-group">
-      <label class="form-label">ObservaÃ§Ãµes (opcional)</label>
-      <input class="form-control" id="e-obs" placeholder="Ex: estoque jÃ¡ existente, lote antigo...">
+      <label class="form-label">Observações (opcional)</label>
+      <input class="form-control" id="e-obs" placeholder="Ex: estoque j&aacute; existente, lote antigo...">
     </div>
     <button class="btn btn-primary btn-full" id="btn-salvar-estoque" onclick="salvarEstoque()">Registrar Entrada</button>
     <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-estoque')">Cancelar</button>
@@ -757,7 +856,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
       </div>
     </div>
     <div class="form-group">
-      <label class="form-label">Nome/Número da cria (opcional)</label>
+      <label class="form-label">Nome/N&uacute;mero da cria (opcional)</label>
       <input class="form-control" id="parto-nome-cria" placeholder="O sistema sugere automaticamente se deixar vazio">
     </div>
     <button class="btn btn-primary btn-full" id="btn-confirmar-parto" onclick="confirmarParto()">Confirmar Parto</button>
@@ -797,7 +896,7 @@ const auth = getAuth(app);
 setPersistence(auth, browserLocalPersistence).catch(() => {});
 enableIndexedDbPersistence(db).catch(() => {});
 
-// ─── STATE ──────────────────────────────────────────────────
+
 let DB = {
   animais: [],
   tratos: [],
@@ -815,15 +914,16 @@ let confirmCb = null;
 let btnLock = {};
 let tratoItens = [];
 let animalGroupOpen = {};
+let calSectionOpen = {};
 
 const ESPECIES = {
-  vaca: '🐄', boi: '🐂', touro:'🐂', novilha:'🐄', cavalo: '🐴', egua: '🐎', bezerro: '🐮', bezerra:'🐮', potro:'🐴', potra:'🐴', outro: '🐾'
+  vaca: '🐄', boi: '🐂', touro: '🐂', novilha: '🐄', cavalo: '🐴', egua: '🐎', bezerro: '🐮', bezerra: '🐮', potro: '🐴', potra: '🐴', outro: '🐾'
 };
 const GESTACAO = { vaca: 283, egua: 340, outro: 285 };
 const INSUMO_NOMES = { racao:'Ração', silagem:'Silo', feno:'Feno', sal:'Sal Mineral', suplemento:'Suplemento', outro:'Outro' };
 const INSUMO_EMOJI = { racao:'🌾', silagem:'🌽', feno:'🍀', sal:'🧂', suplemento:'💊', outro:'📦' };
 
-// ─── FIREBASE SYNC SEGURA POR USUÁRIO ─────────────────────────
+
 function colRef(colecao) {
   if (!currentUser) throw new Error('Usuário não autenticado');
   return collection(db, 'users', currentUser.uid, colecao);
@@ -903,7 +1003,7 @@ window.entrarLogin = async function() {
 };
 
 window.sairLogin = async function() {
-  const ok = await confirmar('Sair do sistema?', 'Você precisará informar e-mail e senha para entrar novamente.', '🔒');
+  const ok = await confirmar('Sair do sistema?', 'Você precisará informar e-mail e senha para entrar novamente.', '💰');
   if (!ok) return;
   await signOut(auth);
 };
@@ -919,11 +1019,11 @@ function traduzErroAuth(code) {
   return erros[code] || code || 'não foi possível entrar.';
 }
 
-// ─── HELPERS ────────────────────────────────────────────────
+
 function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
 function hoje() { return new Date().toISOString().slice(0,10); }
 function fmtR(v) { return 'R$ ' + (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
-function fmtData(d) { if (!d) return '—'; const p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
+function fmtData(d) { if (!d) return '\u2014'; const p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function diasEntre(d1, d2) {
   if (!d1 || !d2) return 0;
   const a = new Date(d1), b = new Date(d2);
@@ -939,14 +1039,24 @@ function noMesAtual(data) {
   return data.slice(0,7) === mes;
 }
 function custoAnimal(id) { return custoAnimalDetalhado(id).total; }
-function nomeAnimal(id) { const a = DB.animais.find(x=>x.id===id); return a ? a.nome : '—'; }
+function nomeAnimal(id) { const a = DB.animais.find(x=>x.id===id); return a ? a.nome : '\u2014'; }
 function especieLabel(v) { return (v||'outro').charAt(0).toUpperCase() + (v||'outro').slice(1); }
 function textoSeguro(v) {
   return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 function animalAtivoParaTrato(a) {
   const status = (a?.status || 'plantel').toLowerCase();
-  return !!a && !['vendido','morto','inativo','baixado'].includes(status);
+  return !!a && ['ativo','plantel'].includes(status);
+}
+function statusAnimal(a) {
+  const status = (typeof a === 'string' ? a : (a?.status || 'ativo')).toLowerCase();
+  return status === 'plantel' ? 'ativo' : status;
+}
+function statusAnimalLabel(status) {
+  return ({ ativo:'Ativo', vendido:'Vendido', morto:'Morto', inativo:'Inativo' })[statusAnimal(status)] || 'Ativo';
+}
+function dataFinalAnimal(a) {
+  return a?.dataStatus || a?.dataSaida || '';
 }
 function isPatrimonioInicial(obj) {
   return obj?.patrimonioInicial === true || obj?.inventarioInicial === true || obj?.origem === 'inventario_inicial';
@@ -975,7 +1085,7 @@ function categoriaAnimal(a) {
   if (!a) return 'Outros';
   const e = a.especie || 'outro';
   if (e === 'vaca') return 'Vacas';
-  if (e === 'egua') return 'Éguas';
+  if (e === 'egua') return '\u00c9guas';
   if (e === 'cavalo') return 'Cavalos';
   if (e === 'touro' || e === 'boi') return e === 'touro' ? 'Touros' : 'Bois';
   if (e === 'novilha') return 'Novilhas';
@@ -983,11 +1093,11 @@ function categoriaAnimal(a) {
   if (e === 'bezerra') return 'Bezerras';
   if (e === 'potro') return 'Potros';
   if (e === 'potra') return 'Potras';
-  if (e === 'outro' && a.sexo === 'femea') return 'Fêmeas - Outros';
+  if (e === 'outro' && a.sexo === 'femea') return 'F\u00eameas - Outros';
   return 'Outros';
 }
 function categoriaOrdem(nome) {
-  const ordem = ['Vacas','Éguas','Novilhas','Touros','Bois','Cavalos','Bezerras','Bezerros','Potras','Potros','Fêmeas - Outros','Outros'];
+  const ordem = ['Vacas','\u00c9guas','Novilhas','Touros','Bois','Cavalos','Bezerras','Bezerros','Potras','Potros','F\u00eameas - Outros','Outros'];
   const i = ordem.indexOf(nome); return i < 0 ? 999 : i;
 }
 function especieCria(mae, sexoCria) {
@@ -1003,7 +1113,7 @@ function custoAnimalDetalhado(id) {
   const a = DB.animais.find(x=>x.id===id);
   if (!a) return {compra:0,tratos:0,saude:0,total:0};
   const inicio = a.dataEntrada || '1900-01-01';
-  const fim = a.status === 'vendido' && a.dataSaida ? a.dataSaida : '9999-12-31';
+  const fim = !animalAtivoParaTrato(a) && dataFinalAnimal(a) ? dataFinalAnimal(a) : '9999-12-31';
   const noPeriodo = d => !d || (d >= inicio && d <= fim);
   const compra = isPatrimonioInicial(a) ? 0 : (parseFloat(a.valorCompra)||0);
   const tratos = DB.tratos.filter(t=>t.animalId===id && noPeriodo(t.data)).reduce((s,t)=>s+(parseFloat(t.custo)||0),0);
@@ -1025,7 +1135,7 @@ function unlockBtn(id) {
   if (el) { el.disabled = false; if (el.dataset.originalText) el.textContent = el.dataset.originalText; }
 }
 
-// ─── TOAST ──────────────────────────────────────────────────
+
 function toast(msg, tipo='info') {
   const wrap = document.getElementById('toast-wrap');
   const el = document.createElement('div');
@@ -1037,7 +1147,7 @@ function toast(msg, tipo='info') {
 }
 window.toast = toast;
 
-// ─── CONFIRM ────────────────────────────────────────────────
+
 function confirmar(titulo, msg, icone='⚠️') {
   return new Promise(res => {
     document.getElementById('confirm-icon').textContent = icone;
@@ -1052,7 +1162,7 @@ window.fecharConfirm = function(ok) {
   if (confirmCb) { confirmCb(ok); confirmCb = null; }
 };
 
-// ─── MODAIS ─────────────────────────────────────────────────
+
 window.fecharModal = function(id) {
   document.getElementById(id).classList.remove('open');
 };
@@ -1063,7 +1173,7 @@ document.querySelectorAll('.modal-overlay').forEach(o => {
   o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
 });
 
-// ─── NAVEGAÇÃO ──────────────────────────────────────────────
+
 window.setPage = function(page, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
@@ -1087,7 +1197,7 @@ window.setInnerTab = function(ctx, tab, el) {
   if (ctx === 'fin') renderFinanceiro();
 };
 
-// ─── RENDER TUDO ────────────────────────────────────────────
+
 function renderTudo() {
   renderAnimais();
   renderTrato();
@@ -1098,30 +1208,31 @@ function renderTudo() {
   atualizarBadgeSaude();
 }
 
-// ─── ANIMAIS ────────────────────────────────────────────────
+
 function renderAnimais() {
   const tab = innerTabAtual.animais;
   const lista = tab === 'plantel'
-    ? DB.animais.filter(a => a.status !== 'vendido')
-    : DB.animais.filter(a => a.status === 'vendido');
+    ? DB.animais.filter(animalAtivoParaTrato)
+    : DB.animais.filter(a => statusAnimal(a) === ({ vendidos:'vendido', mortos:'morto', inativos:'inativo' })[tab]);
 
-  document.getElementById('animais-tab-title').textContent = tab === 'plantel' ? 'Plantel' : 'Vendidos';
+  const titulos = { plantel:'Plantel Ativo', vendidos:'Vendidos', mortos:'Mortos', inativos:'Inativos' };
+  document.getElementById('animais-tab-title').textContent = titulos[tab] || 'Plantel';
   document.getElementById('btn-add-animal').style.display = tab === 'plantel' ? '' : 'none';
 
-  const totalCusto = DB.animais.filter(a=>a.status!=='vendido').reduce((s,a)=>s+custoAnimal(a.id),0);
+  const totalCusto = DB.animais.filter(animalAtivoParaTrato).reduce((s,a)=>s+custoAnimal(a.id),0);
   const recVendas = DB.financeiro.filter(f=>f.tipo==='receita'&&f.categoria==='venda').reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
   const totalDesp = DB.financeiro.filter(f=>f.tipo==='despesa').reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
   const prenhas = DB.prenhez.filter(p=>p.status==='ativa').length;
 
   document.getElementById('metrics-animais').innerHTML = `
-    <div class="metric"><div class="metric-label">No plantel</div><div class="metric-val">${DB.animais.filter(a=>a.status!=='vendido').length}</div></div>
+    <div class="metric"><div class="metric-label">Ativos</div><div class="metric-val">${DB.animais.filter(animalAtivoParaTrato).length}</div></div>
     <div class="metric"><div class="metric-label">Prenhas</div><div class="metric-val gold">${prenhas}</div></div>
     <div class="metric"><div class="metric-label">Custo acumulado</div><div class="metric-val red">${fmtR(totalCusto)}</div></div>
     <div class="metric"><div class="metric-label">Receita vendas</div><div class="metric-val green">${fmtR(recVendas)}</div></div>
   `;
 
   if (!lista.length) {
-    document.getElementById('lista-animais').innerHTML = `<div class="empty"><div class="empty-ico">${tab==='plantel'?'🐄':'🏷️'}</div><div class="empty-txt">${tab==='plantel'?'Nenhum animal no plantel.<br>Toque em + Novo Animal para começar.':'Nenhum animal vendido ainda.'}</div></div>`;
+    document.getElementById('lista-animais').innerHTML = `<div class="empty"><div class="empty-ico">${tab==='plantel'?'\u{1F404}':'\u{1F4DA}'}</div><div class="empty-txt">${tab==='plantel'?'Nenhum animal no plantel.<br>Toque em + Novo Animal para começar.':'Nenhum animal vendido ainda.'}</div></div>`;
     return;
   }
 
@@ -1155,41 +1266,47 @@ window.toggleAnimalGroup = function(gid) {
 function animalCardHTML(a) {
   const detalhado = custoAnimalDetalhado(a.id);
   const custo = detalhado.total;
-  const dias = diasEntre(a.dataEntrada, a.status==='vendido' ? a.dataSaida : hoje());
+  const status = statusAnimal(a);
+  const ativo = animalAtivoParaTrato(a);
+  const dias = diasEntre(a.dataEntrada, ativo ? hoje() : (dataFinalAnimal(a) || hoje()));
   const prenhez = DB.prenhez.find(p => p.animalId === a.id && p.status === 'ativa');
   let badges = '';
-  if (prenhez) badges += `<span class="badge badge-gold">🤰 Gestante</span> `;
+  if (prenhez) badges += `<span class="badge badge-gold">x Gestante</span> `;
   if (a.linkedMaeId) badges += `<span class="badge badge-blue">Cria de ${nomeAnimal(a.linkedMaeId)}</span> `;
-  if (a.status === 'vendido') badges += `<span class="badge badge-gray">Vendido ${fmtData(a.dataSaida)}</span>`;
-  if (isPatrimonioInicial(a)) badges += `<span class="badge badge-gray">PatrimÃ´nio inicial</span>`;
-  return `<div class="animal-card ${a.status==='vendido'?'vendido':''}" onclick="abrirFicha('${a.id}')">
+  if (!ativo) badges += `<span class="badge badge-gray">${statusAnimalLabel(status)} ${fmtData(dataFinalAnimal(a))}</span>`;
+  if (isPatrimonioInicial(a)) badges += `<span class="badge badge-gray">Patrimônio inicial</span>`;
+  return `<div class="animal-card ${!ativo?'vendido':''}" onclick="abrirFicha('${a.id}')">
     <div class="animal-row">
-      <div class="animal-emoji">${ESPECIES[a.especie]||'🐾'}</div>
+      <div class="animal-emoji">${ESPECIES[a.especie]||'\u{1F43E}'}</div>
       <div class="animal-info">
         <div class="animal-nome">${a.nome}</div>
-        <div class="animal-tipo">${especieLabel(a.especie)} · ${a.raca||'S/R'} · ${dias}d ${a.status==='vendido'?'no histórico':'no plantel'}</div>
+        <div class="animal-tipo">${especieLabel(a.especie)}  ${a.raca||'S/R'}  ${dias}d ${ativo?'no plantel':'no histórico'}</div>
         <div style="margin-top:3px">${badges}</div>
       </div>
       <div class="animal-right">
         <div class="animal-custo">${fmtR(custo)}</div>
         <div class="animal-dias">custo total</div>
-        ${a.status!=='vendido'?`<div class="animal-actions">
+        ${ativo?`<div class="animal-actions">
           ${prenhez?`<button class="btn btn-gold btn-mini" onclick="event.stopPropagation();abrirParto('${prenhez.id}')">Parida</button>`:''}
           <button class="btn btn-gold btn-mini" onclick="event.stopPropagation();abrirVenda('${a.id}')">Vender</button>
-          <button class="btn btn-danger btn-mini" onclick="event.stopPropagation();excluirAnimal('${a.id}')">✕</button>
+          <button class="btn btn-ghost btn-mini" onclick="event.stopPropagation();abrirStatusAnimal('${a.id}','morto')">Morto</button>
+          <button class="btn btn-ghost btn-mini" onclick="event.stopPropagation();abrirStatusAnimal('${a.id}','inativo')">Inativo</button>
+          <button class="btn btn-danger btn-mini" onclick="event.stopPropagation();excluirAnimal('${a.id}')">S"</button>
         </div>`:''}
       </div>
     </div>
   </div>`;
 }
 
-// ─── FICHA ANIMAL ───────────────────────────────────────────
+
 window.abrirFicha = function(id) {
   const a = DB.animais.find(x=>x.id===id);
   if (!a) return;
   const detalhado = custoAnimalDetalhado(id);
   const custo = detalhado.total;
-  const dias = diasEntre(a.dataEntrada, a.status==='vendido' ? a.dataSaida : hoje());
+  const status = statusAnimal(a);
+  const ativo = animalAtivoParaTrato(a);
+  const dias = diasEntre(a.dataEntrada, ativo ? hoje() : (dataFinalAnimal(a) || hoje()));
   const tratos = DB.tratos.filter(t=>t.animalId===id).sort((a,b)=>b.data.localeCompare(a.data));
   const saudes = DB.saude.filter(s=>s.animalId===id).sort((a,b)=>b.data.localeCompare(a.data));
   const prenhez = DB.prenhez.filter(p=>p.animalId===id);
@@ -1198,11 +1315,11 @@ window.abrirFicha = function(id) {
 
   let fichaHTML = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:16px">
-      <div style="font-size:44px">${ESPECIES[a.especie]||'🐾'}</div>
+      <div style="font-size:44px">${ESPECIES[a.especie]||'\u{1F43E}'}</div>
       <div>
         <div style="font-family:'Fraunces',serif;font-size:22px;font-weight:500;color:var(--creme)">${a.nome}</div>
-        <div style="font-size:13px;color:var(--texto2)">${a.especie} · ${a.raca||'S/R'} · ${a.sexo}</div>
-        ${a.status==='vendido'?'<span class="badge badge-gray" style="margin-top:4px">Vendido</span>':''}
+        <div style="font-size:13px;color:var(--texto2)">${a.especie}  ${a.raca||'S/R'}  ${a.sexo}</div>
+        <span class="badge badge-gray" style="margin-top:4px">${statusAnimalLabel(status)}</span>
       </div>
     </div>
     <div class="ficha-section">
@@ -1210,12 +1327,13 @@ window.abrirFicha = function(id) {
       <div class="list-item"><span class="list-desc">Entrada</span><span class="list-val">${fmtData(a.dataEntrada)}</span></div>
       <div class="list-item"><span class="list-desc">Dias no plantel</span><span class="list-val">${dias} dias</span></div>
       <div class="list-item"><span class="list-desc">Valor de compra</span><span class="list-val" style="color:var(--danger)">${fmtR(a.valorCompra)}</span></div>
-      <div class="list-item"><span class="list-desc">Peso entrada</span><span class="list-val">${a.pesoEntrada||'—'} kg</span></div>
+      <div class="list-item"><span class="list-desc">Peso entrada</span><span class="list-val">${a.pesoEntrada||''} kg</span></div>
       <div class="list-item"><span class="list-desc">Nascimento</span><span class="list-val">${fmtData(a.dataNascimento)}</span></div>
+      ${!ativo?`<div class="list-item"><span class="list-desc">Status final</span><span class="list-val">${statusAnimalLabel(status)} em ${fmtData(dataFinalAnimal(a))}</span></div>`:''}
       ${a.status==='vendido'?`
       <div class="list-item"><span class="list-desc">Data da venda</span><span class="list-val">${fmtData(a.dataSaida)}</span></div>
       <div class="list-item"><span class="list-desc">Valor de venda</span><span class="list-val" style="color:var(--success)">${fmtR(a.valorVenda)}</span></div>
-      <div class="list-item"><span class="list-desc">Comprador</span><span class="list-val">${a.comprador||'—'}</span></div>
+      <div class="list-item"><span class="list-desc">Comprador</span><span class="list-val">${a.comprador||''}</span></div>
       <div class="list-item"><span class="list-desc">Lucro/Prejuízo</span><span class="list-val" style="color:${(parseFloat(a.valorVenda)-custo)>=0?'var(--success)':'var(--danger)'}">${fmtR(parseFloat(a.valorVenda)-custo)}</span></div>
       `:''}
       ${a.obs?`<div style="margin-top:8px;font-size:12px;color:var(--texto2);padding:8px;background:var(--bg3);border-radius:var(--radius-sm)">${a.obs}</div>`:''}
@@ -1236,11 +1354,11 @@ window.abrirFicha = function(id) {
       const diasGest = diasEntre(p.dataCobertura, hoje());
       const pct = Math.min(100, Math.round(diasGest/espGest*100));
       fichaHTML += `<div class="prenhez-card" style="margin-bottom:8px">
-        <div class="prenhez-animal">Cobertura: ${fmtData(p.dataCobertura)} · ${p.tipo}</div>
-        <div class="prenhez-info">Reprodutor: ${p.reprodutor||'—'} ${p.obs?'· '+p.obs:''}</div>
-        <div class="prenhez-parto">🗓️ Previsão de parto: ${fmtData(parto)} (${espGest}d de gestação)</div>
+        <div class="prenhez-animal">Cobertura: ${fmtData(p.dataCobertura)}  ${p.tipo}</div>
+        <div class="prenhez-info">Reprodutor: ${p.reprodutor||''} ${p.obs?' '+p.obs:''}</div>
+        <div class="prenhez-parto">x Previsão de parto: ${fmtData(parto)} (${espGest}d de gestação)</div>
         <div class="prenhez-prog"><div class="prenhez-prog-fill" style="width:${pct}%"></div></div>
-        <div style="font-size:11px;color:var(--texto3);margin-top:4px">${diasGest}d de gestação · ${pct}% concluído</div>
+        <div style="font-size:11px;color:var(--texto3);margin-top:4px">${diasGest}d de gestação  ${pct}% concludo</div>
         ${p.status==='ativa'?`<button class="btn btn-gold" style="margin-top:8px;padding:5px 10px;font-size:11px" onclick="abrirParto('${p.id}')">Marcar parida</button>`:'<span class="badge badge-gray">Encerrada</span>'}
       </div>`;
     });
@@ -1250,13 +1368,13 @@ window.abrirFicha = function(id) {
   if (saudes.length) {
     fichaHTML += `<div class="ficha-section"><div class="ficha-titulo">Histórico de saúde</div>`;
     saudes.slice(0,5).forEach(s => {
-      fichaHTML += `<div class="list-item"><div><div class="list-desc">${s.desc}</div><div class="list-sub">${s.tipo} · ${fmtData(s.data)}</div></div><span class="list-val" style="color:var(--danger)">${fmtR(s.custo)}</span></div>`;
+      fichaHTML += `<div class="list-item"><div><div class="list-desc">${s.desc}</div><div class="list-sub">${s.tipo}  ${fmtData(s.data)}</div></div><span class="list-val" style="color:var(--danger)">${fmtR(s.custo)}</span></div>`;
     });
     fichaHTML += `</div>`;
   }
 
   if (tratos.length) {
-    fichaHTML += `<div class="ficha-section"><div class="ficha-titulo">Últimos tratos</div>`;
+    fichaHTML += `<div class="ficha-section"><div class="ficha-titulo">altimos tratos</div>`;
     tratos.slice(0,5).forEach(t => {
       let descIngredientes = '';
       if (t.itens && t.itens.length) {
@@ -1266,9 +1384,9 @@ window.abrirFicha = function(id) {
           return `${textoSeguro(nomeIns)} ${i.qtd}${unid}`;
         }).join(', ');
       } else {
-        descIngredientes = t.desc || '—';
+        descIngredientes = t.desc || '';
       }
-      const obsStr = t.obs ? ` · ${t.obs}` : '';
+      const obsStr = t.obs ? `  ${t.obs}` : '';
       fichaHTML += `<div class="list-item"><div><div class="list-desc">${descIngredientes}</div><div class="list-sub">${fmtData(t.data)}${obsStr}</div></div><span class="list-val" style="color:var(--danger)">${fmtR(t.custo)}</span></div>`;
     });
     fichaHTML += `</div>`;
@@ -1280,7 +1398,7 @@ window.abrirFicha = function(id) {
   abrirModal('modal-ficha');
 };
 
-// ─── NOVO ANIMAL ────────────────────────────────────────────
+
 window.abrirModalAnimal = function(id) {
   document.getElementById('modal-animal-title').textContent = id ? 'Editar Animal' : 'Novo Animal';
   document.getElementById('animal-edit-id').value = id || '';
@@ -1332,12 +1450,12 @@ window.salvarAnimal = async function() {
     patrimonioInicial,
     inventarioInicial: patrimonioInicial,
     origem: patrimonioInicial ? 'inventario_inicial' : 'compra',
-    status: (DB.animais.find(x=>x.id===id)?.status)||'plantel'
+    status: statusAnimal(DB.animais.find(x=>x.id===id) || { status:'ativo' })
   };
   const idx = DB.animais.findIndex(a=>a.id===id);
   if (idx>=0) DB.animais[idx] = dados; else DB.animais.push(dados);
   await salvarFirestore('animais', id, dados);
-  // lançar compra no financeiro
+  // lan\u00e7ar compra no financeiro
   const finId = 'compra_'+id;
   if (patrimonioInicial) {
     DB.financeiro = DB.financeiro.filter(f=>f.id!==finId);
@@ -1350,13 +1468,13 @@ window.salvarAnimal = async function() {
   }
   fecharModal('modal-animal');
   renderAnimais(); renderFinanceiro();
-  toast(patrimonioInicial ? nome+' salvo como patrimÃ´nio inicial!' : nome+' salvo com sucesso!','success');
+  toast(patrimonioInicial ? nome+' salvo como patrimônio inicial!' : nome+' salvo com sucesso!','success');
 };
 
 window.excluirAnimal = async function(id) {
   const a = DB.animais.find(x=>x.id===id);
   if (!a) return;
-  const ok = await confirmar('Excluir '+a.nome+'?','Todos os registros de trato, saúde e financeiro deste animal também serão removidos. Esta ação não pode ser desfeita.','🗑️');
+  const ok = await confirmar('Excluir '+a.nome+'?','Todos os registros de trato, saúde e financeiro deste animal também serão removidos. Esta ação não pode ser desfeita.','\u{1F5D1}\uFE0F');
   if (!ok) return;
   const relacionados = {
     tratos: DB.tratos.filter(t=>t.animalId===id),
@@ -1374,10 +1492,10 @@ window.excluirAnimal = async function(id) {
   DB.prenhez = DB.prenhez.filter(p=>p.animalId!==id);
   DB.financeiro = DB.financeiro.filter(f=>f.animalId!==id);
   renderAnimais(); renderFinanceiro(); atualizarBadgeSaude();
-  toast(a.nome+' excluído','info');
+  toast(a.nome+' excludo','info');
 };
 
-// ─── VENDA ──────────────────────────────────────────────────
+
 window.abrirVenda = function(id) {
   const a = DB.animais.find(x=>x.id===id);
   if (!a) return;
@@ -1385,6 +1503,7 @@ window.abrirVenda = function(id) {
   document.getElementById('v-data').value = hoje();
   document.getElementById('v-valor').value = '';
   document.getElementById('v-comprador').value = '';
+  document.getElementById('v-obs').value = '';
   const detalhado = custoAnimalDetalhado(id);
   const custo = detalhado.total;
   const dias = diasEntre(a.dataEntrada, hoje());
@@ -1421,29 +1540,73 @@ window.confirmarVenda = async function() {
   if (!a) return;
   const valor = parseFloat(document.getElementById('v-valor').value)||0;
   if (!valor) { toast('Informe o valor de venda','error'); unlockBtn('btn-confirmar-venda'); return; }
-  const ok = await confirmar('Confirmar venda de '+a.nome+'?', `Valor: ${fmtR(valor)} · Resultado: ${fmtR(valor-custoAnimal(id))}. O animal será arquivado em "Vendidos".`,'💰');
+  const ok = await confirmar('Confirmar venda de '+a.nome+'?', `Valor: ${fmtR(valor)}  Resultado: ${fmtR(valor-custoAnimal(id))}. O animal será arquivado em "Vendidos".`,'💰');
   if (!ok) { unlockBtn('btn-confirmar-venda'); return; }
   a.status = 'vendido';
   a.dataSaida = document.getElementById('v-data').value;
+  a.dataStatus = a.dataSaida;
   a.valorVenda = valor;
   a.comprador = document.getElementById('v-comprador').value.trim();
+  a.obsStatus = document.getElementById('v-obs').value.trim();
   // remover prenhez ativa
   DB.prenhez.filter(p=>p.animalId===id&&p.status==='ativa').forEach(async p => {
     p.status='encerrada'; await salvarFirestore('prenhez',p.id,p);
   });
   await salvarFirestore('animais', id, a);
-  // lançar receita
-  const finId = 'venda_'+id+'_'+uid();
-  const fin = { id:finId, tipo:'receita', categoria:'venda', descricao:'Venda: '+a.nome, valor, data:a.dataSaida, animalId:id };
-  DB.financeiro.push(fin);
+  // lan\u00e7ar receita
+  const finId = 'venda_'+id;
+  const fin = { id:finId, tipo:'receita', categoria:'venda', descricao:'Venda: '+a.nome+(a.obsStatus?' - '+a.obsStatus:''), valor, data:a.dataSaida, animalId:id };
+  const fi = DB.financeiro.findIndex(f=>f.id===finId);
+  if (fi>=0) DB.financeiro[fi]=fin; else DB.financeiro.push(fin);
   await salvarFirestore('financeiro', finId, fin);
   fecharModal('modal-venda');
   renderTudo();
   toast('Venda de '+a.nome+' registrada!','success');
 };
 
-// ─── TRATO MULTIINGREDIENTE + ESTOQUE AUTOMÁTICO ──────────────
-// Preços padrão de fallback (usados apenas quando o ingrediente NÃO está no estoque)
+
+
+window.abrirStatusAnimal = function(id, novoStatus) {
+  const a = DB.animais.find(x=>x.id===id);
+  if (!a) return;
+  document.getElementById('status-animal-id').value = id;
+  document.getElementById('status-animal-novo').value = novoStatus;
+  document.getElementById('status-animal-data').value = hoje();
+  document.getElementById('status-animal-obs').value = '';
+  document.getElementById('status-animal-title').textContent = 'Marcar como ' + statusAnimalLabel(novoStatus);
+  document.getElementById('status-animal-resumo').innerHTML = `<div style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px">
+    <div style="font-family:'Fraunces',serif;font-size:16px;color:var(--creme);margin-bottom:6px">${ESPECIES[a.especie]||'\u{1F43E}'} ${a.nome}</div>
+    <div style="font-size:12px;color:var(--texto2)">O animal sair\u00e1 do plantel ativo, do trato, da projeção mensal e do patrimônio ativo. O histórico completo será mantido.</div>
+  </div>`;
+  abrirModal('modal-status-animal');
+};
+
+window.confirmarStatusAnimal = async function() {
+  if (!lockBtn('btn-confirmar-status-animal')) return;
+  const id = document.getElementById('status-animal-id').value;
+  const novoStatus = document.getElementById('status-animal-novo').value;
+  const a = DB.animais.find(x=>x.id===id);
+  if (!a) { unlockBtn('btn-confirmar-status-animal'); return; }
+  const data = document.getElementById('status-animal-data').value || hoje();
+  const obs = document.getElementById('status-animal-obs').value.trim();
+  const ok = await confirmar('Confirmar status?', `${a.nome} será marcado como ${statusAnimalLabel(novoStatus)} e permanecer\u00e1 no histórico.`, '⚠️');
+  if (!ok) { unlockBtn('btn-confirmar-status-animal'); return; }
+  a.status = novoStatus;
+  a.dataStatus = data;
+  a.dataSaida = data;
+  a.obsStatus = obs;
+  if (novoStatus === 'morto') a.motivoMorte = obs;
+  if (novoStatus === 'inativo') a.motivoInativo = obs;
+  DB.prenhez.filter(p=>p.animalId===id&&p.status==='ativa').forEach(async p => {
+    p.status='encerrada'; await salvarFirestore('prenhez',p.id,p);
+  });
+  await salvarFirestore('animais', id, a);
+  fecharModal('modal-status-animal');
+  unlockBtn('btn-confirmar-status-animal');
+  renderTudo();
+  toast(a.nome+' marcado como '+statusAnimalLabel(novoStatus),'success');
+};
+
 const INSUMOS_PRECO_FALLBACK = { racao:2.80, silagem:0.45, feno:1.20, sal:3.50, suplemento:8.00, outro:1.00 };
 // Unidades disponíveis por tipo de insumo
 const UNIDADES_PADRAO = { racao:'kg', silagem:'kg', feno:'kg', sal:'kg', suplemento:'kg', outro:'kg' };
@@ -1480,9 +1643,9 @@ function getAvisosEstoqueTrato(itens = tratoItens) {
   return Object.entries(consumo).reduce((avisos, [insumo, qtdKg]) => {
     const saldo = getSaldoEstoque(insumo);
     if (saldo === null) {
-      avisos.push(`⚠️ ${INSUMO_NOMES[insumo]||insumo}: sem estoque cadastrado`);
+      avisos.push(`a ${INSUMO_NOMES[insumo]||insumo}: sem estoque cadastrado`);
     } else if (saldo < qtdKg) {
-      avisos.push(`⚠️ ${INSUMO_NOMES[insumo]||insumo}: saldo insuficiente (${saldo.toFixed(1)} kg disponíveis, ${qtdKg.toFixed(1)} kg no trato)`);
+      avisos.push(`a ${INSUMO_NOMES[insumo]||insumo}: saldo insuficiente (${saldo.toFixed(1)} kg disponíveis, ${qtdKg.toFixed(1)} kg no trato)`);
     }
     return avisos;
   }, []);
@@ -1559,7 +1722,7 @@ function renderProjecaoTratoMensal() {
   const linhas = Object.values(proj.porIngrediente).map(item => `
     <div class="trato-hist-ing-row">
       <span>${textoSeguro(item.nome)} - ${(item.qtdDiaKg || 0).toFixed(2)} kg/dia - ${item.animais.size} animal(is)</span>
-      <span style="color:var(--danger)">${fmtR(item.custoDia * 30)}/mes</span>
+      <span style="color:var(--danger)">${fmtR(item.custoDia * 30)}/m\u00eas</span>
     </div>`).join('');
   el.innerHTML = `<div class="card" style="margin-bottom:10px">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
@@ -1585,8 +1748,8 @@ function renderHistTrato() {
   }
   document.getElementById('hist-trato').innerHTML = hist.map(t => {
     const animal = DB.animais.find(x=>x.id===t.animalId);
-    const emoji = animal ? (ESPECIES[animal.especie]||'🐾') : '🐾';
-    const nomeAnim = animal ? animal.nome : '—';
+    const emoji = animal ? (ESPECIES[animal.especie]||'\u{1F43E}') : '\u{1F43E}';
+    const nomeAnim = animal ? animal.nome : '\u2014';
     // Ingredientes detalhados
     let ingredientesHTML = '';
     if (t.itens && t.itens.length) {
@@ -1598,16 +1761,16 @@ function renderHistTrato() {
           const custoUnit = parseFloat(it.custoUnit)||0;
           const subtotal = parseFloat(it.subtotal)||(qtd*custoUnit);
           return `<div class="trato-hist-ing-row">
-            <span>${textoSeguro(nomeIns)} · ${qtd} ${unid}</span>
+            <span>${textoSeguro(nomeIns)}  ${qtd} ${unid}</span>
             <span style="color:var(--texto3)">R$ ${custoUnit.toFixed(2)}/${unid} = <span style="color:var(--danger)">${fmtR(subtotal)}</span></span>
           </div>`;
         }).join('') +
         `</div>`;
     } else {
-      const desc = t.desc || '—';
+      const desc = t.desc || '';
       ingredientesHTML = `<div style="font-size:12px;color:var(--texto2);margin-top:4px">${desc}</div>`;
     }
-    const obsHTML = t.obs ? `<div class="trato-hist-obs">💬 ${t.obs}</div>` : '';
+    const obsHTML = t.obs ? `<div class="trato-hist-obs">\u{1F4DD} ${t.obs}</div>` : '';
     return `<div class="trato-hist-item">
       <div class="trato-hist-header">
         <div style="font-size:22px">${emoji}</div>
@@ -1617,7 +1780,7 @@ function renderHistTrato() {
         </div>
         <div style="text-align:right">
           <div style="color:var(--danger);font-weight:500;font-size:15px">${fmtR(t.custo)}</div>
-          <button onclick="excluirTrato('${t.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:11px;margin-top:2px">✕ excluir</button>
+          <button onclick="excluirTrato('${t.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:11px;margin-top:2px">S" excluir</button>
         </div>
       </div>
       ${ingredientesHTML}
@@ -1642,16 +1805,16 @@ function renderTratoItens() {
     const totalInsumo = consumo[it.insumo] || 0;
     let estoqueInfo = '';
     if (saldo === null) {
-      estoqueInfo = `<div class="trato-est-warn">⚠️ Insumo não encontrado no estoque — custo será estimado (R$ ${custoUnit.toFixed(2)}/kg)</div>`;
+      estoqueInfo = `<div class="trato-est-warn">a Insumo não encontrado no estoque  custo será estimado (R$ ${custoUnit.toFixed(2)}/kg)</div>`;
     } else if (saldo < totalInsumo) {
-      estoqueInfo = `<div class="trato-est-warn">⚠️ Saldo em estoque: ${saldo.toFixed(1)} kg (insuficiente para ${totalInsumo.toFixed(1)} kg no trato)</div>`;
+      estoqueInfo = `<div class="trato-est-warn">a Saldo em estoque: ${saldo.toFixed(1)} kg (insuficiente para ${totalInsumo.toFixed(1)} kg no trato)</div>`;
     } else {
-      estoqueInfo = `<div class="trato-est-ok">✓ Saldo em estoque: ${saldo.toFixed(1)} kg disponíveis</div>`;
+      estoqueInfo = `<div class="trato-est-ok">S Saldo em estoque: ${saldo.toFixed(1)} kg disponíveis</div>`;
     }
     return `<div class="trato-item" id="trato-item-${i}">
       <div class="trato-item-header">
         <span class="trato-item-label">Ingrediente ${i+1}</span>
-        ${tratoItens.length>1?`<span class="trato-remove" onclick="removerTratoItem(${i})">✕</span>`:''}
+        ${tratoItens.length>1?`<span class="trato-remove" onclick="removerTratoItem(${i})">&times;</span>`:''}
       </div>
       <div class="trato-item-row">
         <div class="trato-item-nome" style="flex:2">
@@ -1736,7 +1899,7 @@ function calcTratoTotal() {
   if (statusDiv) {
     statusDiv.innerHTML = avisos.length
       ? avisos.map(a=>`<div style="color:var(--warning)">${a}</div>`).join('')
-      : '<span style="color:var(--success)">✓ Todos os ingredientes têm saldo disponível no estoque</span>';
+      : '<span style="color:var(--success)">S Todos os ingredientes tm saldo disponível no estoque</span>';
   }
 }
 window.calcTratoTotal = calcTratoTotal;
@@ -1748,14 +1911,14 @@ window.salvarTrato = async function() {
 
   const animalId = document.getElementById('trato-animal').value;
   if (!animalId || !DB.animais.find(a=>a.id===animalId&&animalAtivoParaTrato(a))) {
-    toast('Selecione um animal válido','error');
+    toast('Selecione um animal vlido','error');
     if (btn) { btn.textContent = '🌾 Registrar Trato'; btn.disabled = false; }
     unlockBtn('btn-salvar-trato'); return;
   }
   const data = document.getElementById('trato-data').value;
   if (!data) { toast('Informe a data do trato','error'); unlockBtn('btn-salvar-trato'); if (btn) btn.textContent = '🌾 Registrar Trato'; return; }
 
-  // Verificar se há pelo menos um ingrediente com quantidade > 0
+  // Verificar se h pelo menos um ingrediente com quantidade > 0
   const itensValidos = tratoItens.filter(it => (it.qtd||0) > 0);
   if (!itensValidos.length) {
     toast('Informe ao menos um ingrediente com quantidade','error');
@@ -1817,14 +1980,14 @@ window.salvarTrato = async function() {
     DB.estoque = estoqueAtualizado;
     DB.financeiro.push(fin);
 
-    // Reset formulário
+    // Reset formulrio
     tratoItens = [{ insumo:'racao', nome:INSUMO_NOMES.racao, qtd:5, unidade:'kg', custoUnit: getCustoUnitario('racao') }];
     if (document.getElementById('trato-obs')) document.getElementById('trato-obs').value = '';
 
     renderTrato(); renderEstoque(); renderFinanceiro();
     if (btn) btn.textContent = '🌾 Registrar Trato';
     unlockBtn('btn-salvar-trato');
-    toast('✅ Trato registrado com sucesso! Custo: '+fmtR(custo), 'success');
+    toast('S& Trato registrado com sucesso! Custo: '+fmtR(custo), 'success');
   } catch(e) {
     setSyncStatus(true);
     DB.tratos = DB.tratos.filter(t=>t.id!==id);
@@ -1835,7 +1998,7 @@ window.salvarTrato = async function() {
 };
 
 window.excluirTrato = async function(id) {
-  const ok = await confirmar('Excluir este registro de trato?','O custo será removido da ficha do animal e do financeiro. O estoque NÃO será revertido automaticamente.','🗑️');
+  const ok = await confirmar('Excluir este registro de trato?','O custo será removido da ficha do animal e do financeiro. O estoque NÃO será revertido automaticamente.','\u{1F5D1}\uFE0F');
   if (!ok) return;
   DB.tratos = DB.tratos.filter(t=>t.id!==id);
   DB.financeiro = DB.financeiro.filter(f=>f.id!=='trato_'+id);
@@ -1845,7 +2008,7 @@ window.excluirTrato = async function(id) {
   toast('Trato removido','info');
 };
 
-// ─── SAÚDE ──────────────────────────────────────────────────
+
 window.abrirModalSaude = function() {
   const sel = document.getElementById('s-animal');
   const ativos = DB.animais.filter(animalAtivoParaTrato);
@@ -1860,7 +2023,7 @@ window.abrirModalSaude = function() {
 window.salvarSaude = async function() {
   if (!lockBtn('btn-salvar-saude')) return;
   const desc = document.getElementById('s-desc').value.trim();
-  if (!desc) { toast('Informe a descrição','error'); unlockBtn('btn-salvar-saude'); return; }
+  if (!desc) { toast('Informe a descrio','error'); unlockBtn('btn-salvar-saude'); return; }
   const id = uid();
   const dados = {
     id,
@@ -1874,7 +2037,7 @@ window.salvarSaude = async function() {
   };
   DB.saude.push(dados);
   await salvarFirestore('saude', id, dados);
-  // lançar financeiro
+  // lan\u00e7ar financeiro
   const finId = 'saude_'+id;
   const fin = { id:finId, tipo:'despesa', categoria:'saude', descricao:dados.tipo+': '+desc+' ('+nomeAnimal(dados.animalId)+')', valor:dados.custo, data:dados.data, animalId:dados.animalId };
   DB.financeiro.push(fin);
@@ -1887,55 +2050,56 @@ window.salvarSaude = async function() {
 function renderSaude() {
   const tab = innerTabAtual.saude;
   const hoje_str = hoje();
+
   if (tab === 'alertas') {
     const proximas = DB.saude.filter(s => s.proxima && s.proxima >= hoje_str)
       .sort((a,b)=>a.proxima.localeCompare(b.proxima));
     const vencidas = DB.saude.filter(s => s.proxima && s.proxima < hoje_str);
     let html = '';
     if (vencidas.length) {
-      html += `<div class="fin-titulo" style="color:var(--danger)">⚠️ Vencidas (${vencidas.length})</div>`;
+      html += `<div class="fin-titulo" style="color:var(--danger)">a Vencidas (${vencidas.length})</div>`;
       vencidas.forEach(s => {
         html += `<div class="prenhez-card" style="background:var(--danger-bg);border-color:rgba(224,85,85,.3)">
-          <div class="prenhez-animal">${nomeAnimal(s.animalId)} — ${s.desc}</div>
-          <div class="prenhez-info">${s.tipo} · Aplicado: ${fmtData(s.data)}</div>
+          <div class="prenhez-animal">${nomeAnimal(s.animalId)}  ${s.desc}</div>
+          <div class="prenhez-info">${s.tipo}  Aplicado: ${fmtData(s.data)}</div>
           <div style="color:var(--danger);font-size:13px;font-weight:500;margin-top:4px">Próxima dose venceu em ${fmtData(s.proxima)}</div>
-          <button onclick="excluirSaude('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:6px">✕ excluir</button>
+          <button onclick="excluirSaude('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:6px">S" excluir</button>
         </div>`;
       });
     }
     if (proximas.length) {
-      html += `<div class="fin-titulo" style="margin-top:12px">📅 Próximas doses</div>`;
+      html += `<div class="fin-titulo" style="margin-top:12px">x& Próximas doses</div>`;
       proximas.forEach(s => {
         const dias = diasEntre(hoje_str, s.proxima);
         html += `<div class="prenhez-card">
-          <div class="prenhez-animal">${nomeAnimal(s.animalId)} — ${s.desc}</div>
-          <div class="prenhez-info">${s.tipo} · Aplicado: ${fmtData(s.data)}</div>
+          <div class="prenhez-animal">${nomeAnimal(s.animalId)}  ${s.desc}</div>
+          <div class="prenhez-info">${s.tipo}  Aplicado: ${fmtData(s.data)}</div>
           <div class="prenhez-parto">Próxima dose: ${fmtData(s.proxima)} (em ${dias} dias)</div>
         </div>`;
       });
     }
-    if (!vencidas.length && !proximas.length) html = '<div class="empty"><div class="empty-ico">✅</div><div class="empty-txt">Nenhum alerta de saúde.</div></div>';
+    if (!vencidas.length && !proximas.length) html = '<div class="empty"><div class="empty-ico">S&</div><div class="empty-txt">Nenhum alerta de saúde.</div></div>';
     document.getElementById('saude-conteudo').innerHTML = html;
   } else {
     const hist = [...DB.saude].sort((a,b)=>b.data.localeCompare(a.data));
     document.getElementById('saude-conteudo').innerHTML = hist.length ? hist.map(s => `
       <div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:10px">
-        <div style="font-size:22px">${s.tipo==='vacina'?'💉':s.tipo==='medicamento'?'💊':s.tipo==='exame'?'🔬':'🩺'}</div>
+        <div style="font-size:22px">${s.tipo==='vacina'?'\u{1F489}':s.tipo==='medicamento'?'\u{1F48A}':s.tipo==='exame'?'\u{1F50E}':'\u{1F4CB}'}</div>
         <div style="flex:1">
           <div style="font-weight:500;color:var(--creme)">${nomeAnimal(s.animalId)}</div>
-          <div style="font-size:12px;color:var(--texto2)">${s.desc} ${s.obs?'· '+s.obs:''}</div>
-          <div style="font-size:11px;color:var(--texto3)">${fmtData(s.data)}${s.proxima?' · próx: '+fmtData(s.proxima):''}</div>
+          <div style="font-size:12px;color:var(--texto2)">${s.desc} ${s.obs?' '+s.obs:''}</div>
+          <div style="font-size:11px;color:var(--texto3)">${fmtData(s.data)}${s.proxima?'  próx: '+fmtData(s.proxima):''}</div>
         </div>
         <div style="text-align:right">
           <div style="color:var(--danger);font-weight:500">${fmtR(s.custo)}</div>
-          <button onclick="excluirSaude('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:4px">✕</button>
+          <button onclick="excluirSaude('${s.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:4px">S"</button>
         </div>
-      </div>`).join('') : '<div class="empty"><div class="empty-ico">💉</div><div class="empty-txt">Nenhum registro de saúde.</div></div>';
+      </div>`).join('') : '<div class="empty"><div class="empty-ico">x0</div><div class="empty-txt">Nenhum registro de saúde.</div></div>';
   }
 }
 
 window.excluirSaude = async function(id) {
-  const ok = await confirmar('Excluir registro de saúde?','O custo será removido do financeiro.','🗑️');
+  const ok = await confirmar('Excluir registro de saúde?','O custo será removido do financeiro.','\u{1F5D1}\uFE0F');
   if (!ok) return;
   DB.saude = DB.saude.filter(s=>s.id!==id);
   DB.financeiro = DB.financeiro.filter(f=>f.id!=='saude_'+id);
@@ -1953,78 +2117,101 @@ function atualizarBadgeSaude() {
   else badge.style.display='none';
 }
 
-// ─── CALENDÁRIO ─────────────────────────────────────────────
+
 window.navCal = function(dir) { calMes+=dir; if(calMes>11){calMes=0;calAno++;}if(calMes<0){calMes=11;calAno--;} renderCalendario(); };
 
 function renderCalendario() {
   const meses=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  document.getElementById('cal-month-label').textContent = meses[calMes]+' '+calAno;
+  const labelMes = document.getElementById('cal-month-label');
+  if (labelMes) labelMes.textContent = meses[calMes]+' '+calAno;
 
-  const primeiro = new Date(calAno,calMes,1);
-  const ultimo = new Date(calAno,calMes+1,0);
-  const inicioSem = primeiro.getDay();
   const hoje_str = hoje();
+  const gestacaoDias = a => (a && a.especie === 'egua') ? 340 : 283;
 
-  // coletar eventos do mês
-  const eventos = {};
-  DB.prenhez.filter(p=>p.status==='ativa').forEach(p => {
+  const cardPrenhez = p => {
     const a = DB.animais.find(x=>x.id===p.animalId);
-    const espGest = (a&&a.especie==='egua')?340:283;
-    const parto = addDias(p.dataCobertura, espGest);
-    if (parto.startsWith(calAno+'-'+(calMes+1<10?'0':'')+(calMes+1))) {
-      const dia = parseInt(parto.slice(8));
-      if (!eventos[dia]) eventos[dia]=[];
-      eventos[dia].push({ tipo:'parto', animal:a?a.nome:'?', data:parto, prenId:p.id });
-    }
-    const cob = p.dataCobertura;
-    if (cob.startsWith(calAno+'-'+(calMes+1<10?'0':'')+(calMes+1))) {
-      const dia = parseInt(cob.slice(8));
-      if (!eventos[dia]) eventos[dia]=[];
-      eventos[dia].push({ tipo:'cobertura', animal:a?a.nome:'?' });
-    }
-  });
-  DB.saude.filter(s=>s.proxima&&s.proxima.startsWith(calAno+'-'+(calMes+1<10?'0':'')+(calMes+1))).forEach(s => {
-    const dia = parseInt(s.proxima.slice(8));
-    if (!eventos[dia]) eventos[dia]=[];
-    eventos[dia].push({ tipo:'saude', animal:nomeAnimal(s.animalId), desc:s.desc });
-  });
-
-  let html = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
-  for(let i=0;i<inicioSem;i++) html+=`<div class="cal-day other-month"></div>`;
-  for(let d=1;d<=ultimo.getDate();d++) {
-    const dataStr = calAno+'-'+(calMes+1<10?'0':'')+(calMes+1)+'-'+(d<10?'0':'')+d;
-    const isHoje = dataStr===hoje_str;
-    const ev = eventos[d];
-    html += `<div class="cal-day ${isHoje?'today':''} ${ev?'has-event':''}" ${ev?`onclick="verEventoCal('${dataStr}')"`:''}>${d}</div>`;
-  }
-  document.getElementById('cal-grid').innerHTML = html;
-
-  // prenhez ativas
-  const prenhezAtivas = DB.prenhez.filter(p=>p.status==='ativa');
-  if (!prenhezAtivas.length) {
-    document.getElementById('prenhez-list').innerHTML = '<div class="empty"><div class="empty-ico">🤰</div><div class="empty-txt">Nenhuma gestação ativa.<br>Toque em + Prenhez para registrar.</div></div>';
-    return;
-  }
-  document.getElementById('prenhez-list').innerHTML = prenhezAtivas.map(p => {
-    const a = DB.animais.find(x=>x.id===p.animalId);
-    const espGest = (a&&a.especie==='egua')?340:283;
+    const espGest = gestacaoDias(a);
     const parto = addDias(p.dataCobertura, espGest);
     const diasGest = diasEntre(p.dataCobertura, hoje_str);
-    const pct = Math.min(100,Math.round(diasGest/espGest*100));
+    const pct = Math.min(100, Math.max(0, Math.round(diasGest / espGest * 100)));
     const diasFaltam = diasEntre(hoje_str, parto);
     return `<div class="prenhez-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start">
-        <div class="prenhez-animal">${a?ESPECIES[a.especie]:''} ${a?a.nome:'—'}</div>
-        <button onclick="excluirPrenhez('${p.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:14px">✕</button>
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div class="prenhez-animal">${a ? ESPECIES[a.especie] || '' : ''} ${a ? textoSeguro(a.nome) : '\u2014'}</div>
+          <div class="prenhez-info">Tipo: Gestação ativa - Cobertura: ${fmtData(p.dataCobertura)} - ${textoSeguro(p.tipo || '')}${p.reprodutor ? ' - '+textoSeguro(p.reprodutor) : ''}</div>
+          <div class="prenhez-parto">Previsão de parto: ${fmtData(parto)} (${diasFaltam > 0 ? 'em '+diasFaltam+'d' : 'hoje/passado'})</div>
+          ${p.obs ? `<div class="prenhez-info">Observação: ${textoSeguro(p.obs)}</div>` : ''}
+        </div>
+        <button onclick="excluirPrenhez('${p.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:14px">&times;</button>
       </div>
-      <div class="prenhez-info">Cobertura: ${fmtData(p.dataCobertura)} · ${p.tipo}${p.reprodutor?' · '+p.reprodutor:''}</div>
-      <div class="prenhez-parto">🗓️ Previsão de parto: ${fmtData(parto)} (${diasFaltam>0?'em '+diasFaltam+'d':'hoje/passado'})</div>
       <div class="prenhez-prog"><div class="prenhez-prog-fill" style="width:${pct}%"></div></div>
-      <div style="font-size:11px;color:var(--texto3);margin-top:4px">${diasGest}d de gestação · ${pct}% · ${espGest}d total (${a&&a.especie==='egua'?'Égua':'Bovina'})</div>
-      <div class="event-actions"><button class="btn btn-gold btn-mini" onclick="abrirParto('${p.id}')">Marcar parida</button>${a?`<button class="btn btn-primary btn-mini" onclick="abrirVenda('${a.id}')">Marcar vendida</button>`:''}</div>
+      <div style="font-size:11px;color:var(--texto3);margin-top:4px">${diasGest}d de gestação - ${pct}% - ${espGest}d total</div>
+      <div class="event-actions">
+        <button class="btn btn-gold btn-mini" onclick="abrirParto('${p.id}')">Marcar parida</button>
+        ${a ? `<button class="btn btn-primary btn-mini" onclick="abrirVenda('${a.id}')">Marcar vendida</button><button class="btn btn-ghost btn-mini" onclick="abrirFicha('${a.id}')">Ver ficha</button>` : ''}
+      </div>
     </div>`;
-  }).join('');
+  };
+
+  const cardSaude = s => `<div class="prenhez-card">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div>
+        <div class="prenhez-animal">${textoSeguro(nomeAnimal(s.animalId))}</div>
+        <div class="prenhez-info">Tipo: ${textoSeguro(s.tipo || 'Evento')} - Data: ${fmtData(s.data)}</div>
+        <div class="prenhez-parto">Previsão/próxima: ${fmtData(s.proxima || s.data)}</div>
+        <div class="prenhez-info">${textoSeguro(s.desc || '')}${s.obs ? ' - Observação: '+textoSeguro(s.obs) : ''}</div>
+      </div>
+      <button onclick="excluirSaude('${s.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:14px">&times;</button>
+    </div>
+    <div class="event-actions">
+      ${s.animalId ? `<button class="btn btn-ghost btn-mini" onclick="abrirFicha('${s.animalId}')">Ver ficha</button>` : ''}
+      ${s.animalId ? `<button class="btn btn-primary btn-mini" onclick="abrirVenda('${s.animalId}')">Marcar vendida</button>` : ''}
+      <button class="btn btn-gold btn-mini" onclick="excluirSaude('${s.id}')">Concluir evento</button>
+    </div>
+  </div>`;
+
+  const secao = (id, titulo, itens, render, vazio) => {
+    const aberto = calSectionOpen[id] !== false;
+    return `<div class="animal-group">
+      <div class="animal-group-head" onclick="toggleCalSection('${id}')">
+        <div>
+          <div class="animal-group-title">${titulo} (${itens.length})</div>
+          <div class="animal-group-sub">${itens.length ? 'Eventos cadastrados' : vazio}</div>
+        </div>
+        <div class="animal-group-action">${aberto ? 'Mostrar menos' : 'Mostrar mais'}</div>
+      </div>
+      <div class="animal-group-body ${aberto ? 'open' : ''}">
+        ${itens.length ? itens.map(render).join('') : `<div class="empty" style="padding:16px"><div class="empty-txt">${vazio}</div></div>`}
+      </div>
+    </div>`;
+  };
+
+  const prenhezAtivasLista = DB.prenhez.filter(p=>p.status==='ativa');
+  const partosPrevistos = [...prenhezAtivasLista].sort((a,b) => {
+    const aa = DB.animais.find(x=>x.id===a.animalId);
+    const bb = DB.animais.find(x=>x.id===b.animalId);
+    return addDias(a.dataCobertura, gestacaoDias(aa)).localeCompare(addDias(b.dataCobertura, gestacaoDias(bb)));
+  });
+  const eventosSaude = DB.saude.filter(s=>s.proxima).sort((a,b)=>(a.proxima || '').localeCompare(b.proxima || ''));
+  const vacinas = eventosSaude.filter(s=>(s.tipo||'').toLowerCase()==='vacina');
+  const vermifugos = eventosSaude.filter(s=>!vacinas.includes(s) && /(verm|iverm|endect|paras)/i.test((s.tipo||'')+' '+(s.desc||'')));
+  const pendentes = eventosSaude.filter(s=>s.proxima >= hoje_str && !vacinas.includes(s) && !vermifugos.includes(s));
+  const concluidos = DB.saude.filter(s=>!s.proxima).sort((a,b)=>(b.data||'').localeCompare(a.data||''));
+
+  document.getElementById('prenhez-list').innerHTML =
+    secao('gestacoes', 'Gestações ativas', prenhezAtivasLista, cardPrenhez, 'Nenhuma gestação ativa.') +
+    secao('partos', 'Partos previstos', partosPrevistos, cardPrenhez, 'Nenhum parto previsto.') +
+    secao('vacinas', 'Vacinas', vacinas, cardSaude, 'Nenhuma vacina prevista.') +
+    secao('vermifugos', 'Vermífugos', vermifugos, cardSaude, 'Nenhum verm\u00edfugo previsto.') +
+    secao('pendentes', 'Eventos pendentes', pendentes, cardSaude, 'Nenhum evento pendente.') +
+    secao('concluidos', 'Eventos concluídos', concluidos, cardSaude, 'Nenhum evento concluído.');
 }
+
+window.toggleCalSection = function(id) {
+  calSectionOpen[id] = calSectionOpen[id] !== false ? false : true;
+  renderCalendario();
+};
 
 window.verEventoCal = function(dataStr) {
   const eventos = [];
@@ -2032,11 +2219,11 @@ window.verEventoCal = function(dataStr) {
     const a = DB.animais.find(x=>x.id===p.animalId);
     const espGest = (a&&a.especie==='egua')?340:283;
     const parto = addDias(p.dataCobertura, espGest);
-    if (parto===dataStr) eventos.push({ tipo:'Previsão de Parto', animal:a?a.nome:'?', animalId:a?a.id:'', prenId:p.id, emoji:'🐣', cor:'var(--dourado)', acao:'parto' });
-    if (p.dataCobertura===dataStr) eventos.push({ tipo:'Data de Cobertura', animal:a?a.nome:'?', animalId:a?a.id:'', prenId:p.id, emoji:'❤️', cor:'var(--verde-super)', acao:'cobertura' });
+    if (parto===dataStr) eventos.push({ tipo:'Previsão de Parto', animal:a?a.nome:'?', animalId:a?a.id:'', prenId:p.id, emoji:'\u{1F4C5}', cor:'var(--dourado)', acao:'parto' });
+    if (p.dataCobertura===dataStr) eventos.push({ tipo:'Data de Cobertura', animal:a?a.nome:'?', animalId:a?a.id:'', prenId:p.id, emoji:'\u{1F4DD}', cor:'var(--verde-super)', acao:'cobertura' });
   });
   DB.saude.filter(s=>s.proxima===dataStr).forEach(s => {
-    eventos.push({ tipo:s.desc, animal:nomeAnimal(s.animalId), animalId:s.animalId, emoji:'💉', cor:'var(--danger)', acao:'saude' });
+    eventos.push({ tipo:s.desc, animal:nomeAnimal(s.animalId), animalId:s.animalId, emoji:'x0', cor:'var(--danger)', acao:'saude' });
   });
   document.getElementById('evento-cal-title').textContent = 'Eventos de '+fmtData(dataStr);
   document.getElementById('evento-cal-conteudo').innerHTML = eventos.map(e=>`
@@ -2054,7 +2241,7 @@ window.verEventoCal = function(dataStr) {
   abrirModal('modal-evento-cal');
 };
 
-// ─── PARTO AUTOMÁTICO ──────────────────────────────────────
+
 window.abrirParto = function(prenhezId) {
   const p = DB.prenhez.find(x=>x.id===prenhezId);
   if (!p) return toast('Prenhez não encontrada.', 'error');
@@ -2069,7 +2256,7 @@ window.abrirParto = function(prenhezId) {
   document.getElementById('parto-sexo').innerHTML = ops.map(o=>`<option value="${o.v}">${o.t}</option>`).join('');
   document.getElementById('parto-sexo-label').textContent = mae.especie === 'egua' ? 'Sexo da cria (potro/potra)' : 'Sexo da cria (bezerro/bezerra)';
   document.getElementById('parto-title').textContent = 'Registrar parto de '+mae.nome;
-  document.getElementById('parto-resumo').innerHTML = `<div class="prenhez-card"><div class="prenhez-animal">${ESPECIES[mae.especie]||'🐾'} ${mae.nome}</div><div class="prenhez-info">O sistema vai encerrar a gestação, remover do calendário e criar a cria no plantel automaticamente.</div></div>`;
+  document.getElementById('parto-resumo').innerHTML = `<div class="prenhez-card"><div class="prenhez-animal">${ESPECIES[mae.especie]||'\u{1F43E}'} ${mae.nome}</div><div class="prenhez-info">O sistema vai encerrar a gestação, remover do calendário e criar a cria no plantel automaticamente.</div></div>`;
   abrirModal('modal-parto');
 };
 
@@ -2117,11 +2304,11 @@ window.confirmarParto = async function() {
   toast('Parto registrado e cria adicionada ao plantel!', 'success');
 };
 
-// ─── PRENHEZ ────────────────────────────────────────────────
+
 window.abrirModalPrenhez = function() {
-  const fêmeas = DB.animais.filter(a=>animalAtivoParaTrato(a)&&(a.sexo==='femea'||['vaca','egua'].includes(a.especie)));
+  const femeas = DB.animais.filter(a=>animalAtivoParaTrato(a)&&(a.sexo==='femea'||['vaca','egua'].includes(a.especie)));
   const sel = document.getElementById('p-animal');
-  sel.innerHTML = fêmeas.length ? fêmeas.map(a=>`<option value="${a.id}">${ESPECIES[a.especie]} ${a.nome}</option>`).join('') : '<option value="">Nenhuma fêmea disponível</option>';
+  sel.innerHTML = femeas.length ? femeas.map(a=>`<option value="${a.id}">${ESPECIES[a.especie]} ${textoSeguro(a.nome)}</option>`).join('') : '<option value="">Nenhuma fêmea disponível</option>';
   document.getElementById('p-cobertura').value = hoje();
   ['p-reprodutor','p-obs'].forEach(x=>document.getElementById(x).value='');
   calcParto();
@@ -2136,7 +2323,7 @@ window.calcParto = function() {
   const label = (a&&a.especie==='egua')?'Égua (340 dias)':'Bovina (283 dias)';
   if (cob) {
     const parto = addDias(cob, espGest);
-    document.getElementById('p-parto-preview').textContent = `🗓️ Previsão de parto: ${fmtData(parto)} (${label})`;
+    document.getElementById('p-parto-preview').textContent = `📅 Previsão de parto: ${fmtData(parto)} (${label})`;
   }
 };
 document.getElementById('p-animal').addEventListener('change', window.calcParto);
@@ -2162,7 +2349,7 @@ window.salvarPrenhez = async function() {
 };
 
 window.excluirPrenhez = async function(id) {
-  const ok = await confirmar('Excluir registro de prenhez?','O calendário será atualizado automaticamente.','🗑️');
+  const ok = await confirmar('Excluir registro de prenhez?','O calendário será atualizado automaticamente.','\u{1F5D1}\uFE0F');
   if (!ok) return;
   DB.prenhez = DB.prenhez.filter(p=>p.id!==id);
   await deletarFirestore('prenhez',id);
@@ -2171,7 +2358,7 @@ window.excluirPrenhez = async function(id) {
 };
 
 window.encerrarPrenhez = async function(id) {
-  const ok = await confirmar('Encerrar esta gestação?','Marque como encerrada após o parto ou em caso de perda.','🐣');
+  const ok = await confirmar('Encerrar esta gestação?','Marque como encerrada após o parto ou em caso de perda.','⚠️');
   if (!ok) return;
   const p = DB.prenhez.find(x=>x.id===id);
   if (p) { p.status='encerrada'; await salvarFirestore('prenhez',id,p); }
@@ -2180,14 +2367,14 @@ window.encerrarPrenhez = async function(id) {
   toast('Gestação encerrada','info');
 };
 
-// ─── ESTOQUE ────────────────────────────────────────────────
+
 function renderEstoque() {
   const totalVal = DB.estoque.reduce((s,e)=>(s+(e.saldo||0)*e.custo_kg),0);
   const totalInicial = DB.estoque.reduce((s,e)=>s+(parseFloat(e.valorInicial)||0),0);
   const baixos = DB.estoque.filter(e=>e.saldo<e.minimo).length;
   document.getElementById('metrics-estoque').innerHTML = `
     <div class="metric"><div class="metric-label">Valor em estoque</div><div class="metric-val">${fmtR(totalVal)}</div></div>
-    <div class="metric"><div class="metric-label">InventÃ¡rio inicial</div><div class="metric-val">${fmtR(totalInicial)}</div></div>
+    <div class="metric"><div class="metric-label">Inventário inicial</div><div class="metric-val">${fmtR(totalInicial)}</div></div>
     <div class="metric"><div class="metric-label">Itens abaixo mínimo</div><div class="metric-val ${baixos?'red':''}">${baixos}</div></div>`;
   if (!DB.estoque.length) {
     document.getElementById('lista-estoque').innerHTML = '<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">Nenhum insumo cadastrado.<br>Toque em + Entrada para adicionar.</div></div>';
@@ -2198,17 +2385,17 @@ function renderEstoque() {
     const baixo = e.saldo < e.minimo;
     return `<div class="est-row">
       <div class="est-header">
-        <div class="est-emoji">${INSUMO_EMOJI[e.insumo]||'📦'}</div>
+        <div class="est-emoji">${INSUMO_EMOJI[e.insumo]||'\u{1F4E6}'}</div>
         <div class="est-nome">${INSUMO_NOMES[e.insumo]||e.insumo}${isPatrimonioInicial(e)?' <span class="badge badge-gray">Inicial</span>':''}</div>
         <div class="est-saldo" style="color:${baixo?'var(--danger)':''}">${(e.saldo||0).toFixed(1)} kg</div>
-        <button onclick="excluirEstoque('${e.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:13px">✕</button>
+        <button onclick="excluirEstoque('${e.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:13px">S"</button>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--texto2)">
         <span>Custo/kg: R$ ${(e.custo_kg||0).toFixed(2)}</span>
         <span>Valor: ${fmtR((e.saldo||0)*e.custo_kg)}</span>
       </div>
       <div class="est-prog" style="margin-top:6px"><div class="est-prog-fill" style="width:${pct}%;background:${baixo?'var(--danger)':'var(--success)'}"></div></div>
-      ${baixo?`<div style="font-size:11px;color:var(--danger);margin-top:3px">⚠️ Abaixo do mínimo (${e.minimo} kg)</div>`:''}
+      ${baixo?`<div style="font-size:11px;color:var(--danger);margin-top:3px">a Abaixo do mínimo (${e.minimo} kg)</div>`:''}
     </div>`;
   }).join('');
 }
@@ -2217,7 +2404,7 @@ window.abrirModalEstoque = function() {
   ['e-qtd','e-valor','e-fornecedor','e-obs'].forEach(x=>document.getElementById(x).value='');
   document.getElementById('e-insumo').value='racao';
   document.getElementById('e-data').value=hoje();
-  document.getElementById('e-custo-kg').textContent='Custo por kg: —';
+  document.getElementById('e-custo-kg').textContent='Custo por kg: \u2014';
   document.getElementById('e-inicial').checked = false;
   abrirModal('modal-estoque');
 };
@@ -2225,7 +2412,7 @@ window.abrirModalEstoque = function() {
 window.calcEstoque = function() {
   const qtd = parseFloat(document.getElementById('e-qtd').value)||0;
   const val = parseFloat(document.getElementById('e-valor').value)||0;
-  document.getElementById('e-custo-kg').textContent = qtd&&val ? 'Custo por kg: R$ '+(val/qtd).toFixed(2) : 'Custo por kg: —';
+  document.getElementById('e-custo-kg').textContent = qtd&&val ? 'Custo por kg: R$ '+(val/qtd).toFixed(2) : 'Custo por kg: \u2014';
 };
 
 window.salvarEstoque = async function() {
@@ -2292,7 +2479,7 @@ window.salvarEstoque = async function() {
     fecharModal('modal-estoque');
     renderEstoque(); renderFinanceiro(); renderTratoItens();
     unlockBtn('btn-salvar-estoque');
-    toast(patrimonioInicial ? 'Estoque salvo como inventÃ¡rio inicial!' : 'Estoque atualizado!','success');
+    toast(patrimonioInicial ? 'Estoque salvo como inventário inicial!' : 'Estoque atualizado!','success');
   } catch(e) {
     setSyncStatus(true);
     unlockBtn('btn-salvar-estoque');
@@ -2301,7 +2488,7 @@ window.salvarEstoque = async function() {
 };
 
 window.excluirEstoque = async function(id) {
-  const ok = await confirmar('Excluir este item do estoque?','O saldo será removido.','🗑️');
+  const ok = await confirmar('Excluir este item do estoque?','O saldo será removido.','\u{1F5D1}\uFE0F');
   if (!ok) return;
   DB.estoque = DB.estoque.filter(e=>e.id!==id);
   await deletarFirestore('estoque',id);
@@ -2309,7 +2496,7 @@ window.excluirEstoque = async function(id) {
   toast('Item removido','info');
 };
 
-// ─── FINANCEIRO ─────────────────────────────────────────────
+
 function renderFinanceiro() {
   const fluxo = DB.financeiro.filter(f=>!isPatrimonioInicial(f) && noMesAtual(f.data));
   const despesas = fluxo.filter(f=>f.tipo==='despesa');
@@ -2322,21 +2509,21 @@ function renderFinanceiro() {
   const resumoEl = document.getElementById('resumo-patrimonio');
   if (resumoEl) {
     resumoEl.innerHTML = `<div class="card" style="margin-bottom:10px">
-      <div class="card-title" style="margin-bottom:10px">PatrimÃ´nio / InventÃ¡rio</div>
+      <div class="card-title" style="margin-bottom:10px">Patrimônio / Inventário</div>
       <div class="metrics" style="margin-bottom:0">
-        <div class="metric"><div class="metric-label">PatrimÃ´nio total</div><div class="metric-val">${fmtR(patrimonio.patrimonioTotal)}</div></div>
+        <div class="metric"><div class="metric-label">Patrimônio total</div><div class="metric-val">${fmtR(patrimonio.patrimonioTotal)}</div></div>
         <div class="metric"><div class="metric-label">Animais ativos</div><div class="metric-val">${fmtR(patrimonio.valorAnimais)}</div></div>
         <div class="metric"><div class="metric-label">Estoque atual</div><div class="metric-val">${fmtR(patrimonio.valorEstoque)}</div></div>
-        <div class="metric"><div class="metric-label">InventÃ¡rio inicial</div><div class="metric-val">${fmtR(patrimonio.inventarioInicial)}</div></div>
+        <div class="metric"><div class="metric-label">Inventário inicial</div><div class="metric-val">${fmtR(patrimonio.inventarioInicial)}</div></div>
       </div>
-      <div style="font-size:11px;color:var(--texto3);margin-top:8px">Valores de inventÃ¡rio inicial nÃ£o entram como despesa nem prejuÃ­zo do fluxo financeiro.</div>
+      <div style="font-size:11px;color:var(--texto3);margin-top:8px">Valores de inventário inicial não entram como despesa nem prejuízo do fluxo financeiro.</div>
     </div>`;
   }
 
   document.getElementById('metrics-fin').innerHTML = `
-    <div class="metric"><div class="metric-label">Receitas do mes</div><div class="metric-val green">${fmtR(totalRec)}</div></div>
-    <div class="metric"><div class="metric-label">Despesas do mes</div><div class="metric-val red">${fmtR(totalDesp)}</div></div>
-    <div class="metric"><div class="metric-label">Lucro/prejuizo do mes</div><div class="metric-val ${lucro>=0?'green':'red'}">${fmtR(lucro)}</div></div>
+    <div class="metric"><div class="metric-label">Receitas do m\u00eas</div><div class="metric-val green">${fmtR(totalRec)}</div></div>
+    <div class="metric"><div class="metric-label">Despesas do m\u00eas</div><div class="metric-val red">${fmtR(totalDesp)}</div></div>
+    <div class="metric"><div class="metric-label">Lucro/preju\u00edzo do m\u00eas</div><div class="metric-val ${lucro>=0?'green':'red'}">${fmtR(lucro)}</div></div>
     <div class="metric"><div class="metric-label">Margem</div><div class="metric-val ${lucro>=0?'green':'red'}">${totalRec?Math.round(lucro/totalRec*100):0}%</div></div>`;
 
   const tab = innerTabAtual.fin;
@@ -2344,10 +2531,10 @@ function renderFinanceiro() {
   const sorted = [...lista].sort((a,b)=>(b.data||'').localeCompare(a.data||''));
   document.getElementById('fin-conteudo').innerHTML = sorted.length ? sorted.map(f=>`
     <div class="list-item">
-      <div><div class="list-desc">${f.descricao}</div><div class="list-sub">${fmtData(f.data)} · ${f.categoria||''}</div></div>
+      <div><div class="list-desc">${f.descricao}</div><div class="list-sub">${fmtData(f.data)}  ${f.categoria||''}</div></div>
       <div style="display:flex;align-items:center;gap:8px">
         <span class="list-val" style="color:${f.tipo==='receita'?'var(--success)':'var(--danger)'}">${fmtR(f.valor)}</span>
-        <button onclick="excluirFinanceiro('${f.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:13px">✕</button>
+        <button onclick="excluirFinanceiro('${f.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:13px">S"</button>
       </div>
     </div>`).join('') : `<div class="empty" style="padding:20px"><div class="empty-txt">Nenhum registro.</div></div>`;
 
@@ -2361,8 +2548,8 @@ function renderFinanceiro() {
   document.getElementById('fin-por-animal').innerHTML = porAnimal.length ? porAnimal.map(x=>`
     <div class="list-item">
       <div style="display:flex;align-items:center;gap:8px">
-        <span style="font-size:18px">${ESPECIES[x.a.especie]||'🐾'}</span>
-        <div><div class="list-desc">${x.a.nome}</div><div class="list-sub">${x.a.especie}${x.a.status==='vendido'?' · Vendido':''}</div></div>
+        <span style="font-size:18px">${ESPECIES[x.a.especie]||'x'}</span>
+        <div><div class="list-desc">${x.a.nome}</div><div class="list-sub">${x.a.especie}${x.a.status==='vendido'?'  Vendido':''}</div></div>
       </div>
       <div style="text-align:right">
         <div style="color:var(--danger);font-size:13px;font-weight:500">${fmtR(x.custo)}</div>
@@ -2372,15 +2559,15 @@ function renderFinanceiro() {
 }
 
 window.excluirFinanceiro = async function(id) {
-  const ok = await confirmar('Excluir este lançamento?','Esta ação não pode ser desfeita.','🗑️');
+  const ok = await confirmar('Excluir este lançamento?','Esta ação não pode ser desfeita.','\u{1F5D1}\uFE0F');
   if (!ok) return;
   DB.financeiro = DB.financeiro.filter(f=>f.id!==id);
   await deletarFirestore('financeiro',id);
   renderFinanceiro();
-  toast('Lançamento removido','info');
+  toast('Lan\u00e7amento removido','info');
 };
 
-// ─── INIT ────────────────────────────────────────────────────
+
 function inicializarCampos() {
   document.getElementById('f-entrada').value = hoje();
   document.getElementById('trato-data').value = hoje();
@@ -2404,6 +2591,31 @@ if ('serviceWorker' in navigator) {
     });
   }).catch(()=>{});
 }
+
+const TUTORIAL_KEY = 'gestao_fazenda_tutorial_done';
+
+function verificarTutorial() {
+  if (localStorage.getItem(TUTORIAL_KEY) !== '1') {
+    abrirTutorial();
+  }
+}
+
+window.abrirTutorial = function() {
+  document.getElementById('tutorial-overlay').classList.add('open');
+};
+
+window.fecharTutorial = function() {
+  document.getElementById('tutorial-overlay').classList.remove('open');
+};
+
+window.fecharTutorialSempre = function() {
+  try { localStorage.setItem(TUTORIAL_KEY, '1'); } catch(e) {}
+  document.getElementById('tutorial-overlay').classList.remove('open');
+};
+
+document.getElementById('tutorial-overlay').addEventListener('click', function(e) {
+  if (e.target === this) fecharTutorial();
+});
 
 onAuthStateChanged(auth, async (user) => {
   const splash = document.getElementById('splash');
@@ -2430,6 +2642,7 @@ onAuthStateChanged(auth, async (user) => {
   inicializarCampos();
   try {
     await carregarTudo();
+    verificarTutorial();
   } catch(e) {
     toast('Erro ao iniciar: '+e.message, 'error');
     renderTudo();
