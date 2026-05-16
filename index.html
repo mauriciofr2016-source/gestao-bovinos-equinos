@@ -230,10 +230,28 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
 .empty-txt{font-size:14px}
 
 /* TRATO MULTI */
-.trato-item{display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:6px}
-.trato-item select,.trato-item input{background:transparent;border:none;color:var(--texto);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;flex:1;min-width:0}
-.trato-item input{width:60px;text-align:right}
-.trato-remove{color:var(--danger);font-size:16px;cursor:pointer;flex-shrink:0;padding:2px 4px}
+.trato-item{background:var(--bg3);border:1px solid var(--borda);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:8px}
+.trato-item-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.trato-item-row:last-child{margin-bottom:0}
+.trato-item select,.trato-item input{background:var(--card);border:1px solid var(--borda);border-radius:6px;color:var(--texto);font-family:'DM Sans',sans-serif;font-size:13px;outline:none;padding:6px 8px}
+.trato-item select:focus,.trato-item input:focus{border-color:var(--verde-claro)}
+.trato-item input{width:100%}
+.trato-item-nome{flex:2}
+.trato-item-qtd{flex:1}
+.trato-item-unidade{flex:1}
+.trato-item-custounit{flex:1}
+.trato-item-subtotal{flex:1;font-size:12px;color:var(--danger);font-weight:500;text-align:right;padding:6px 4px;background:var(--danger-bg);border-radius:6px;text-align:center}
+.trato-remove{color:var(--danger);font-size:18px;cursor:pointer;flex-shrink:0;padding:2px 6px;background:var(--danger-bg);border-radius:6px;border:1px solid var(--danger);line-height:1}
+.trato-item-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.trato-item-label{font-size:11px;color:var(--texto3);text-transform:uppercase;letter-spacing:.4px}
+.trato-item-info{font-size:11px;color:var(--texto3);margin-top:4px}
+.trato-est-warn{font-size:11px;color:var(--warning);margin-top:3px}
+.trato-est-ok{font-size:11px;color:var(--success);margin-top:3px}
+.trato-hist-item{background:var(--card);border:1px solid var(--borda);border-radius:var(--radius);padding:12px;margin-bottom:8px}
+.trato-hist-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.trato-hist-ingredientes{border-top:1px solid var(--borda);padding-top:8px;margin-top:4px}
+.trato-hist-ing-row{display:flex;justify-content:space-between;font-size:12px;color:var(--texto2);padding:3px 0}
+.trato-hist-obs{font-size:11px;color:var(--texto3);margin-top:6px;padding:6px 8px;background:var(--bg3);border-radius:6px;font-style:italic}
 
 /* FICHA DETAIL */
 .detail-panel{display:none;background:var(--bg3);border-radius:0 0 var(--radius) var(--radius);margin-top:-2px;border:1px solid var(--borda);border-top:none;padding:14px}
@@ -344,23 +362,34 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
     <div class="page" id="pg-trato">
       <div class="section-title">
         Registrar Trato
-        <button class="btn btn-ghost" onclick="addTratoItem()">+ Linha</button>
+        <button class="btn btn-ghost" onclick="addTratoItem()">+ Ingrediente</button>
       </div>
       <div class="card" style="margin-bottom:14px">
-        <div class="form-group">
-          <label class="form-label">Animal</label>
-          <select class="form-control" id="trato-animal"></select>
+        <div class="form-row cols2">
+          <div class="form-group">
+            <label class="form-label">Animal</label>
+            <select class="form-control" id="trato-animal"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Data do trato</label>
+            <input type="date" class="form-control" id="trato-data">
+          </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Data do trato</label>
-          <input type="date" class="form-control" id="trato-data">
-        </div>
+        <div class="form-label" style="margin-bottom:8px;margin-top:4px">🌾 Ingredientes do trato</div>
         <div id="trato-itens"></div>
-        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center">
-          <span style="font-size:12px;color:var(--texto2)">Custo total calculado:</span>
-          <span style="font-size:16px;font-weight:500;color:var(--danger)" id="trato-total-preview">R$ 0,00</span>
+        <button class="btn btn-ghost btn-full" style="margin-bottom:12px;font-size:12px" onclick="addTratoItem()">+ Adicionar ingrediente</button>
+        <div class="form-group">
+          <label class="form-label">Observações (opcional)</label>
+          <input type="text" class="form-control" id="trato-obs" placeholder="Ex: trato da manhã, animais em bom estado...">
         </div>
-        <button class="btn btn-primary btn-full" id="btn-salvar-trato" onclick="salvarTrato()">Registrar Trato</button>
+        <div style="background:var(--bg3);border-radius:var(--radius-sm);padding:12px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <span style="font-size:12px;color:var(--texto2)">Custo total calculado:</span>
+            <span style="font-size:18px;font-weight:500;color:var(--danger)" id="trato-total-preview">R$ 0,00</span>
+          </div>
+          <div id="trato-estoque-status" style="font-size:11px;color:var(--texto3)"></div>
+        </div>
+        <button class="btn btn-primary btn-full" id="btn-salvar-trato" onclick="salvarTrato()">🌾 Registrar Trato</button>
       </div>
       <div class="section-title" style="margin-top:8px">Histórico de Trato</div>
       <div id="hist-trato"></div>
@@ -1154,7 +1183,18 @@ window.abrirFicha = function(id) {
   if (tratos.length) {
     fichaHTML += `<div class="ficha-section"><div class="ficha-titulo">Últimos tratos</div>`;
     tratos.slice(0,5).forEach(t => {
-      fichaHTML += `<div class="list-item"><div><div class="list-desc">${t.itens?t.itens.map(i=>i.insumo+' '+i.qtd+'kg').join(', '):t.desc||'—'}</div><div class="list-sub">${fmtData(t.data)}</div></div><span class="list-val" style="color:var(--danger)">${fmtR(t.custo)}</span></div>`;
+      let descIngredientes = '';
+      if (t.itens && t.itens.length) {
+        descIngredientes = t.itens.map(i => {
+          const nomeIns = i.nome || INSUMO_NOMES[i.insumo] || i.insumo || '—';
+          const unid = i.unidade || 'kg';
+          return `${nomeIns} ${i.qtd}${unid}`;
+        }).join(', ');
+      } else {
+        descIngredientes = t.desc || '—';
+      }
+      const obsStr = t.obs ? ` · ${t.obs}` : '';
+      fichaHTML += `<div class="list-item"><div><div class="list-desc">${descIngredientes}</div><div class="list-sub">${fmtData(t.data)}${obsStr}</div></div><span class="list-val" style="color:var(--danger)">${fmtR(t.custo)}</span></div>`;
     });
     fichaHTML += `</div>`;
   }
@@ -1314,110 +1354,274 @@ window.confirmarVenda = async function() {
   toast('Venda de '+a.nome+' registrada!','success');
 };
 
-// ─── TRATO ──────────────────────────────────────────────────
-const INSUMOS_PRECO = { racao:2.80, silagem:0.45, feno:1.20, sal:3.50, suplemento:8.00, outro:1.00 };
+// ─── TRATO MULTIINGREDIENTE + ESTOQUE AUTOMÁTICO ──────────────
+// Preços padrão de fallback (usados apenas quando o ingrediente NÃO está no estoque)
+const INSUMOS_PRECO_FALLBACK = { racao:2.80, silagem:0.45, feno:1.20, sal:3.50, suplemento:8.00, outro:1.00 };
+// Unidades disponíveis por tipo de insumo
+const UNIDADES_PADRAO = { racao:'kg', silagem:'kg', feno:'kg', sal:'kg', suplemento:'kg', outro:'kg' };
+
+// Retorna o custo/kg real do estoque, ou fallback se não houver estoque
+function getCustoUnitario(insumo) {
+  const est = DB.estoque.find(e => e.insumo === insumo);
+  if (est && est.custo_kg > 0) return est.custo_kg;
+  return INSUMOS_PRECO_FALLBACK[insumo] || 1.00;
+}
+
+// Retorna saldo disponível no estoque para um insumo
+function getSaldoEstoque(insumo) {
+  const est = DB.estoque.find(e => e.insumo === insumo);
+  return est ? (est.saldo || 0) : null; // null = não cadastrado
+}
 
 function renderTratoSelects() {
   const sel = document.getElementById('trato-animal');
   const ativos = DB.animais.filter(a=>a.status!=='vendido');
-  sel.innerHTML = ativos.length ? ativos.map(a=>`<option value="${a.id}">${ESPECIES[a.especie]} ${a.nome}</option>`).join('') : '<option>Nenhum animal</option>';
+  sel.innerHTML = ativos.length
+    ? ativos.map(a=>`<option value="${a.id}">${ESPECIES[a.especie]} ${a.nome}</option>`).join('')
+    : '<option value="">Nenhum animal cadastrado</option>';
 }
 
 function renderTrato() {
   renderTratoSelects();
   document.getElementById('trato-data').value = hoje();
+  if (document.getElementById('trato-obs')) document.getElementById('trato-obs').value = '';
   if (!tratoItens.length) addTratoItem();
   renderTratoItens();
-  const hist = [...DB.tratos].sort((a,b)=>b.data.localeCompare(a.data)).slice(0,15);
-  document.getElementById('hist-trato').innerHTML = hist.length ? hist.map(t => {
-    const a = DB.animais.find(x=>x.id===t.animalId);
-    const emoji = a ? ESPECIES[a.especie] : '🐾';
-    const nome = a ? a.nome : '—';
-    const desc = t.itens ? t.itens.map(i=>INSUMO_NOMES[i.insumo]||i.insumo+' '+i.qtd+'kg').join(', ') : t.desc||'—';
-    return `<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:10px">
-      <div style="font-size:22px">${emoji}</div>
-      <div style="flex:1">
-        <div style="font-weight:500;color:var(--creme)">${nome}</div>
-        <div style="font-size:12px;color:var(--texto2)">${desc}</div>
-        <div style="font-size:11px;color:var(--texto3)">${fmtData(t.data)}</div>
+  renderHistTrato();
+}
+
+function renderHistTrato() {
+  const hist = [...DB.tratos].sort((a,b)=>(b.data||'').localeCompare(a.data||'')).slice(0,20);
+  if (!hist.length) {
+    document.getElementById('hist-trato').innerHTML = '<div class="empty"><div class="empty-ico">🌾</div><div class="empty-txt">Nenhum trato registrado ainda.<br>Registre o primeiro trato acima.</div></div>';
+    return;
+  }
+  document.getElementById('hist-trato').innerHTML = hist.map(t => {
+    const animal = DB.animais.find(x=>x.id===t.animalId);
+    const emoji = animal ? (ESPECIES[animal.especie]||'🐾') : '🐾';
+    const nomeAnim = animal ? animal.nome : '—';
+    // Ingredientes detalhados
+    let ingredientesHTML = '';
+    if (t.itens && t.itens.length) {
+      ingredientesHTML = `<div class="trato-hist-ingredientes">` +
+        t.itens.map(it => {
+          const nomeIns = it.nome || INSUMO_NOMES[it.insumo] || it.insumo || '—';
+          const unid = it.unidade || 'kg';
+          const qtd = parseFloat(it.qtd)||0;
+          const custoUnit = parseFloat(it.custoUnit)||0;
+          const subtotal = parseFloat(it.subtotal)||(qtd*custoUnit);
+          return `<div class="trato-hist-ing-row">
+            <span>${nomeIns} · ${qtd} ${unid}</span>
+            <span style="color:var(--texto3)">R$ ${custoUnit.toFixed(2)}/${unid} = <span style="color:var(--danger)">${fmtR(subtotal)}</span></span>
+          </div>`;
+        }).join('') +
+        `</div>`;
+    } else {
+      const desc = t.desc || '—';
+      ingredientesHTML = `<div style="font-size:12px;color:var(--texto2);margin-top:4px">${desc}</div>`;
+    }
+    const obsHTML = t.obs ? `<div class="trato-hist-obs">💬 ${t.obs}</div>` : '';
+    return `<div class="trato-hist-item">
+      <div class="trato-hist-header">
+        <div style="font-size:22px">${emoji}</div>
+        <div style="flex:1">
+          <div style="font-weight:500;color:var(--creme)">${nomeAnim}</div>
+          <div style="font-size:11px;color:var(--texto3)">${fmtData(t.data)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="color:var(--danger);font-weight:500;font-size:15px">${fmtR(t.custo)}</div>
+          <button onclick="excluirTrato('${t.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:11px;margin-top:2px">✕ excluir</button>
+        </div>
       </div>
-      <div style="text-align:right">
-        <div style="color:var(--danger);font-weight:500">${fmtR(t.custo)}</div>
-        <button onclick="excluirTrato('${t.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:11px;margin-top:4px">✕ excluir</button>
-      </div>
+      ${ingredientesHTML}
+      ${obsHTML}
     </div>`;
-  }).join('') : '<div class="empty"><div class="empty-ico">🌾</div><div class="empty-txt">Nenhum trato registrado.</div></div>';
+  }).join('');
 }
 
 window.addTratoItem = function() {
-  tratoItens.push({ insumo:'racao', qtd:5 });
+  // Novo item: usa nome livre, insumo do estoque, qtd, unidade, custoUnit calculado
+  tratoItens.push({ insumo:'racao', nome:'', qtd:5, unidade:'kg', custoUnit: getCustoUnitario('racao') });
   renderTratoItens();
 };
 
 function renderTratoItens() {
-  document.getElementById('trato-itens').innerHTML = tratoItens.map((it,i) => `
-    <div class="trato-item">
-      <select onchange="tratoItens[${i}].insumo=this.value;calcTratoTotal()" style="background:var(--bg3);border:none;color:var(--texto);font-size:13px;flex:1;padding:4px 0">
-        ${Object.entries(INSUMO_NOMES).map(([k,v])=>`<option value="${k}" ${it.insumo===k?'selected':''}>${v}</option>`).join('')}
-      </select>
-      <input type="number" value="${it.qtd}" min="0.5" step="0.5" style="width:60px;background:transparent;border:none;color:var(--texto);font-size:13px;text-align:right" oninput="tratoItens[${i}].qtd=parseFloat(this.value)||0;calcTratoTotal()">
-      <span style="color:var(--texto3);font-size:12px">kg</span>
-      ${tratoItens.length>1?`<span class="trato-remove" onclick="removerTratoItem(${i})">✕</span>`:''}
-    </div>`).join('');
+  document.getElementById('trato-itens').innerHTML = tratoItens.map((it,i) => {
+    const custoUnit = it.custoUnit || getCustoUnitario(it.insumo);
+    const subtotal = (it.qtd||0) * custoUnit;
+    const saldo = getSaldoEstoque(it.insumo);
+    let estoqueInfo = '';
+    if (saldo === null) {
+      estoqueInfo = `<div class="trato-est-warn">⚠️ Insumo não encontrado no estoque — custo será estimado (R$ ${custoUnit.toFixed(2)}/kg)</div>`;
+    } else if (saldo < (it.qtd||0)) {
+      estoqueInfo = `<div class="trato-est-warn">⚠️ Saldo em estoque: ${saldo.toFixed(1)} kg (insuficiente para ${it.qtd||0} kg)</div>`;
+    } else {
+      estoqueInfo = `<div class="trato-est-ok">✓ Saldo em estoque: ${saldo.toFixed(1)} kg disponíveis</div>`;
+    }
+    return `<div class="trato-item" id="trato-item-${i}">
+      <div class="trato-item-header">
+        <span class="trato-item-label">Ingrediente ${i+1}</span>
+        ${tratoItens.length>1?`<span class="trato-remove" onclick="removerTratoItem(${i})">✕</span>`:''}
+      </div>
+      <div class="trato-item-row">
+        <div class="trato-item-nome" style="flex:2">
+          <select style="width:100%" onchange="tratoItens[${i}].insumo=this.value;tratoItens[${i}].nome=this.options[this.selectedIndex].text;tratoItens[${i}].custoUnit=getCustoUnitario(this.value);tratoItens[${i}].unidade=UNIDADES_PADRAO[this.value]||'kg';renderTratoItens()">
+            ${Object.entries(INSUMO_NOMES).map(([k,v])=>`<option value="${k}" ${it.insumo===k?'selected':''}>${v}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="trato-item-row">
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Quantidade</div>
+          <input type="number" value="${it.qtd||''}" min="0.01" step="0.5" placeholder="Qtd" oninput="tratoItens[${i}].qtd=parseFloat(this.value)||0;renderTratoItens()">
+        </div>
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Unidade</div>
+          <select onchange="tratoItens[${i}].unidade=this.value;renderTratoItens()">
+            ${['kg','g','L','mL','saco','unid'].map(u=>`<option value="${u}" ${(it.unidade||'kg')===u?'selected':''}>${u}</option>`).join('')}
+          </select>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Custo/${it.unidade||'kg'}</div>
+          <input type="number" value="${custoUnit.toFixed(4)}" min="0" step="0.01" placeholder="R$/un" oninput="tratoItens[${i}].custoUnit=parseFloat(this.value)||0;renderTratoItens()">
+        </div>
+        <div style="flex:1">
+          <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Subtotal</div>
+          <div class="trato-item-subtotal">${fmtR(subtotal)}</div>
+        </div>
+      </div>
+      ${estoqueInfo}
+    </div>`;
+  }).join('');
   calcTratoTotal();
 }
 
 window.removerTratoItem = function(i) {
   tratoItens.splice(i,1);
+  if (!tratoItens.length) tratoItens.push({ insumo:'racao', nome:'', qtd:5, unidade:'kg', custoUnit: getCustoUnitario('racao') });
   renderTratoItens();
 };
 
 function calcTratoTotal() {
-  let total = tratoItens.reduce((s,it) => {
-    const preco = INSUMOS_PRECO[it.insumo]||1;
-    return s + (it.qtd||0)*preco;
-  }, 0);
-  // descontar estoque disponível
-  document.getElementById('trato-total-preview').textContent = fmtR(total);
+  let total = 0;
+  const statusDiv = document.getElementById('trato-estoque-status');
+  const avisos = [];
+  tratoItens.forEach(it => {
+    const custoUnit = it.custoUnit || getCustoUnitario(it.insumo);
+    const sub = (it.qtd||0) * custoUnit;
+    total += sub;
+    const saldo = getSaldoEstoque(it.insumo);
+    if (saldo === null) {
+      avisos.push(`⚠️ ${INSUMO_NOMES[it.insumo]||it.insumo}: sem estoque cadastrado`);
+    } else if (saldo < (it.qtd||0)) {
+      avisos.push(`⚠️ ${INSUMO_NOMES[it.insumo]||it.insumo}: saldo insuficiente (${saldo.toFixed(1)} kg disponíveis)`);
+    }
+  });
+  const el = document.getElementById('trato-total-preview');
+  if (el) el.textContent = fmtR(total);
+  if (statusDiv) {
+    statusDiv.innerHTML = avisos.length
+      ? avisos.map(a=>`<div style="color:var(--warning)">${a}</div>`).join('')
+      : '<span style="color:var(--success)">✓ Todos os ingredientes têm saldo disponível no estoque</span>';
+  }
 }
 window.calcTratoTotal = calcTratoTotal;
 
 window.salvarTrato = async function() {
-  if (!lockBtn('btn-salvar-trato')) return;
+  if (!lockBtn('btn-salvar-trato', 8000)) return;
+  const btn = document.getElementById('btn-salvar-trato');
+  if (btn) btn.textContent = 'Salvando...';
+
   const animalId = document.getElementById('trato-animal').value;
   if (!animalId || !DB.animais.find(a=>a.id===animalId&&a.status!=='vendido')) {
-    toast('Selecione um animal','error'); unlockBtn('btn-salvar-trato'); return;
+    toast('Selecione um animal válido','error');
+    if (btn) { btn.textContent = '🌾 Registrar Trato'; btn.disabled = false; }
+    unlockBtn('btn-salvar-trato'); return;
   }
   const data = document.getElementById('trato-data').value;
-  const itens = tratoItens.map(it=>({ insumo:it.insumo, qtd:it.qtd||0, preco:INSUMOS_PRECO[it.insumo]||1, subtotal:(it.qtd||0)*(INSUMOS_PRECO[it.insumo]||1) }));
-  const custo = itens.reduce((s,it)=>s+it.subtotal,0);
-  const id = uid();
-  const trato = { id, animalId, data, itens, custo, desc: itens.map(i=>INSUMO_NOMES[i.insumo]+' '+i.qtd+'kg').join(', ') };
-  DB.tratos.push(trato);
-  await salvarFirestore('tratos', id, trato);
-  // debitar estoque
-  for (const it of itens) {
-    const est = DB.estoque.find(e=>e.insumo===it.insumo);
-    if (est) { est.saldo = Math.max(0,(est.saldo||0)-it.qtd); await salvarFirestore('estoque',est.id,est); }
+  if (!data) { toast('Informe a data do trato','error'); unlockBtn('btn-salvar-trato'); if (btn) btn.textContent = '🌾 Registrar Trato'; return; }
+
+  // Verificar se há pelo menos um ingrediente com quantidade > 0
+  const itensValidos = tratoItens.filter(it => (it.qtd||0) > 0);
+  if (!itensValidos.length) {
+    toast('Informe ao menos um ingrediente com quantidade','error');
+    unlockBtn('btn-salvar-trato'); if (btn) btn.textContent = '🌾 Registrar Trato'; return;
   }
-  // lançar financeiro
-  const finId = 'trato_'+id;
-  const fin = { id:finId, tipo:'despesa', categoria:'trato', descricao:'Trato: '+nomeAnimal(animalId)+' ('+trato.desc+')', valor:custo, data, animalId };
-  DB.financeiro.push(fin);
-  await salvarFirestore('financeiro', finId, fin);
-  tratoItens = [{ insumo:'racao', qtd:5 }];
-  renderTrato(); renderEstoque(); renderFinanceiro();
-  toast('Trato registrado: '+fmtR(custo),'success');
+
+  const obs = document.getElementById('trato-obs') ? document.getElementById('trato-obs').value.trim() : '';
+
+  // Montar itens finais com todos os campos
+  const itens = itensValidos.map(it => {
+    const custoUnit = it.custoUnit || getCustoUnitario(it.insumo);
+    const qtd = it.qtd || 0;
+    const subtotal = qtd * custoUnit;
+    return {
+      insumo: it.insumo,
+      nome: INSUMO_NOMES[it.insumo] || it.insumo,
+      qtd,
+      unidade: it.unidade || 'kg',
+      custoUnit,
+      subtotal
+    };
+  });
+
+  const custo = itens.reduce((s,it)=>s+it.subtotal, 0);
+  const id = uid();
+  const desc = itens.map(i=>`${i.nome} ${i.qtd}${i.unidade}`).join(', ');
+  const trato = { id, animalId, data, itens, custo, obs, desc };
+
+  try {
+    DB.tratos.push(trato);
+    await salvarFirestore('tratos', id, trato);
+
+    // ── DEBITAR ESTOQUE AUTOMATICAMENTE ──
+    for (const it of itens) {
+      const est = DB.estoque.find(e=>e.insumo===it.insumo);
+      if (est) {
+        const saldoAnterior = est.saldo || 0;
+        // Converter unidades para kg se necessário (para insumos em kg no estoque)
+        let qtdKg = it.qtd;
+        if (it.unidade === 'g') qtdKg = it.qtd / 1000;
+        else if (it.unidade === 'L' || it.unidade === 'mL') qtdKg = it.qtd; // tratar como equivalente
+        est.saldo = Math.max(0, saldoAnterior - qtdKg);
+        await salvarFirestore('estoque', est.id, est);
+      }
+      // Se insumo não está no estoque, apenas registra o trato (sem debitar)
+    }
+
+    // ── LANÇAR NO FINANCEIRO ──
+    const finId = 'trato_'+id;
+    const fin = {
+      id: finId, tipo:'despesa', categoria:'trato',
+      descricao: 'Trato: '+nomeAnimal(animalId)+' ('+desc+')',
+      valor: custo, data, animalId
+    };
+    DB.financeiro.push(fin);
+    await salvarFirestore('financeiro', finId, fin);
+
+    // Reset formulário
+    tratoItens = [{ insumo:'racao', nome:'Ração', qtd:5, unidade:'kg', custoUnit: getCustoUnitario('racao') }];
+    if (document.getElementById('trato-obs')) document.getElementById('trato-obs').value = '';
+
+    renderTrato(); renderEstoque(); renderFinanceiro();
+    if (btn) btn.textContent = '🌾 Registrar Trato';
+    toast('✅ Trato registrado com sucesso! Custo: '+fmtR(custo), 'success');
+  } catch(e) {
+    DB.tratos = DB.tratos.filter(t=>t.id!==id);
+    if (btn) btn.textContent = '🌾 Registrar Trato';
+    unlockBtn('btn-salvar-trato');
+    toast('Erro ao salvar trato: ' + e.message, 'error');
+  }
 };
 
 window.excluirTrato = async function(id) {
-  const ok = await confirmar('Excluir este registro de trato?','O custo será removido da ficha do animal.','🗑️');
+  const ok = await confirmar('Excluir este registro de trato?','O custo será removido da ficha do animal e do financeiro. O estoque NÃO será revertido automaticamente.','🗑️');
   if (!ok) return;
   DB.tratos = DB.tratos.filter(t=>t.id!==id);
   DB.financeiro = DB.financeiro.filter(f=>f.id!=='trato_'+id);
   await deletarFirestore('tratos',id);
   await deletarFirestore('financeiro','trato_'+id);
-  renderTrato(); renderFinanceiro();
+  renderHistTrato(); renderFinanceiro();
   toast('Trato removido','info');
 };
 
@@ -1905,7 +2109,7 @@ window.excluirFinanceiro = async function(id) {
 function inicializarCampos() {
   document.getElementById('f-entrada').value = hoje();
   document.getElementById('trato-data').value = hoje();
-  tratoItens = [{ insumo:'racao', qtd:5 }];
+  tratoItens = [{ insumo:'racao', nome:'Ração', qtd:5, unidade:'kg', custoUnit: getCustoUnitario('racao') }];
   renderTratoItens();
 }
 
