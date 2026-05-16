@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gestao-fazenda-v13';
+const CACHE_NAME = 'gestao-fazenda-v14';
 const ASSETS = [
   './',
   './index.html',
