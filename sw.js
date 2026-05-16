@@ -1,4 +1,4 @@
-const CACHE_NAME = 'fazenda-v1.3-fix-login';
+const CACHE_NAME = 'gestao-fazenda-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -25,6 +25,10 @@ self.addEventListener('activate', event => {
   );
 });
 
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});
+
 self.addEventListener('fetch', event => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -39,9 +43,23 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  if (req.mode === 'navigate' || req.destination === 'document') {
+    event.respondWith(
+      fetch(req).then(res => {
+        if (res && res.ok) {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put('./index.html', clone)).catch(() => {});
+        }
+        return res;
+      }).catch(() => caches.match(req).then(cached => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
   event.respondWith(
     caches.match(req).then(cached => {
-      return cached || fetch(req).then(res => {
+      if (cached) return cached;
+      return fetch(req).then(res => {
         if (res && res.ok) {
           const clone = res.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(req, clone)).catch(() => {});

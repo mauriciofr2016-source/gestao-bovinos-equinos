@@ -271,6 +271,18 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
 .event-card{padding:10px;background:var(--bg3);border-radius:var(--radius-sm);margin-bottom:8px;border:1px solid var(--borda)}
 .event-top{display:flex;gap:10px;align-items:center}
 
+@media (max-width:480px){
+  .form-row.cols2,.form-row.cols3{grid-template-columns:1fr}
+  .section-title{gap:10px;align-items:flex-start}
+  .trato-item-row{flex-wrap:wrap;align-items:flex-start}
+  .trato-item-row>div{min-width:calc(50% - 4px)}
+  .trato-item-nome{min-width:100%}
+  .trato-hist-ing-row{gap:6px;flex-wrap:wrap}
+  .trato-hist-ing-row span:last-child{width:100%}
+  .est-header{flex-wrap:wrap}
+  .est-saldo{margin-left:auto}
+}
+
 </style>
 </head>
 <body>
@@ -745,7 +757,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc, serverTimestamp, enableIndexedDbPersistence }
+import { getFirestore, doc, setDoc, collection, getDocs, deleteDoc, serverTimestamp, enableIndexedDbPersistence, writeBatch }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, setPersistence, browserLocalPersistence }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -804,7 +816,7 @@ function docRef(colecao, id) {
 async function salvarFirestore(colecao, id, dados) {
   try {
     setSyncStatus(false);
-    await setDoc(docRef(colecao, id), { ...dados, donoUid: currentUser.uid, _ts: serverTimestamp() }, { merge: true });
+    await setDoc(docRef(colecao, id), dadosFirestore(dados), { merge: true });
     setSyncStatus(true);
     return true;
   } catch(e) {
@@ -812,6 +824,11 @@ async function salvarFirestore(colecao, id, dados) {
     toast('Erro ao salvar: ' + e.message, 'error');
     return false;
   }
+}
+
+function dadosFirestore(dados) {
+  if (!currentUser) throw new Error('Usuario nao autenticado');
+  return { ...dados, donoUid: currentUser.uid, _ts: serverTimestamp() };
 }
 
 async function deletarFirestore(colecao, id) {
@@ -1373,6 +1390,33 @@ function getSaldoEstoque(insumo) {
   return est ? (est.saldo || 0) : null; // null = não cadastrado
 }
 
+function qtdParaKg(qtd, unidade) {
+  const n = parseFloat(qtd) || 0;
+  if (unidade === 'g' || unidade === 'mL') return n / 1000;
+  return n;
+}
+
+function consumoTratoPorInsumo(itens = tratoItens) {
+  return itens.reduce((acc, it) => {
+    if (!it || !it.insumo) return acc;
+    acc[it.insumo] = (acc[it.insumo] || 0) + qtdParaKg(it.qtd, it.unidade || 'kg');
+    return acc;
+  }, {});
+}
+
+function getAvisosEstoqueTrato(itens = tratoItens) {
+  const consumo = consumoTratoPorInsumo(itens);
+  return Object.entries(consumo).reduce((avisos, [insumo, qtdKg]) => {
+    const saldo = getSaldoEstoque(insumo);
+    if (saldo === null) {
+      avisos.push(`⚠️ ${INSUMO_NOMES[insumo]||insumo}: sem estoque cadastrado`);
+    } else if (saldo < qtdKg) {
+      avisos.push(`⚠️ ${INSUMO_NOMES[insumo]||insumo}: saldo insuficiente (${saldo.toFixed(1)} kg disponíveis, ${qtdKg.toFixed(1)} kg no trato)`);
+    }
+    return avisos;
+  }, []);
+}
+
 function renderTratoSelects() {
   const sel = document.getElementById('trato-animal');
   const ativos = DB.animais.filter(a=>a.status!=='vendido');
@@ -1446,15 +1490,17 @@ window.addTratoItem = function() {
 };
 
 function renderTratoItens() {
+  const consumo = consumoTratoPorInsumo();
   document.getElementById('trato-itens').innerHTML = tratoItens.map((it,i) => {
     const custoUnit = it.custoUnit || getCustoUnitario(it.insumo);
     const subtotal = (it.qtd||0) * custoUnit;
     const saldo = getSaldoEstoque(it.insumo);
+    const totalInsumo = consumo[it.insumo] || 0;
     let estoqueInfo = '';
     if (saldo === null) {
       estoqueInfo = `<div class="trato-est-warn">⚠️ Insumo não encontrado no estoque — custo será estimado (R$ ${custoUnit.toFixed(2)}/kg)</div>`;
-    } else if (saldo < (it.qtd||0)) {
-      estoqueInfo = `<div class="trato-est-warn">⚠️ Saldo em estoque: ${saldo.toFixed(1)} kg (insuficiente para ${it.qtd||0} kg)</div>`;
+    } else if (saldo < totalInsumo) {
+      estoqueInfo = `<div class="trato-est-warn">⚠️ Saldo em estoque: ${saldo.toFixed(1)} kg (insuficiente para ${totalInsumo.toFixed(1)} kg no trato)</div>`;
     } else {
       estoqueInfo = `<div class="trato-est-ok">✓ Saldo em estoque: ${saldo.toFixed(1)} kg disponíveis</div>`;
     }
@@ -1473,7 +1519,7 @@ function renderTratoItens() {
       <div class="trato-item-row">
         <div style="flex:1">
           <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Quantidade</div>
-          <input type="number" value="${it.qtd||''}" min="0.01" step="0.5" placeholder="Qtd" oninput="tratoItens[${i}].qtd=parseFloat(this.value)||0;renderTratoItens()">
+          <input type="number" value="${it.qtd||''}" min="0.01" step="0.5" placeholder="Qtd" oninput="atualizarTratoItem(${i},'qtd',this.value)">
         </div>
         <div style="flex:1">
           <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Unidade</div>
@@ -1483,11 +1529,11 @@ function renderTratoItens() {
         </div>
         <div style="flex:1">
           <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Custo/${it.unidade||'kg'}</div>
-          <input type="number" value="${custoUnit.toFixed(4)}" min="0" step="0.01" placeholder="R$/un" oninput="tratoItens[${i}].custoUnit=parseFloat(this.value)||0;renderTratoItens()">
+          <input type="number" value="${custoUnit.toFixed(4)}" min="0" step="0.01" placeholder="R$/un" oninput="atualizarTratoItem(${i},'custoUnit',this.value)">
         </div>
         <div style="flex:1">
           <div style="font-size:10px;color:var(--texto3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.3px">Subtotal</div>
-          <div class="trato-item-subtotal">${fmtR(subtotal)}</div>
+          <div class="trato-item-subtotal" id="trato-subtotal-${i}">${fmtR(subtotal)}</div>
         </div>
       </div>
       ${estoqueInfo}
@@ -1495,6 +1541,16 @@ function renderTratoItens() {
   }).join('');
   calcTratoTotal();
 }
+
+window.atualizarTratoItem = function(i, campo, valor) {
+  if (!tratoItens[i]) return;
+  tratoItens[i][campo] = parseFloat(valor) || 0;
+  const custoUnit = tratoItens[i].custoUnit || getCustoUnitario(tratoItens[i].insumo);
+  const subtotal = (tratoItens[i].qtd || 0) * custoUnit;
+  const subEl = document.getElementById('trato-subtotal-' + i);
+  if (subEl) subEl.textContent = fmtR(subtotal);
+  calcTratoTotal();
+};
 
 window.removerTratoItem = function(i) {
   tratoItens.splice(i,1);
@@ -1505,18 +1561,12 @@ window.removerTratoItem = function(i) {
 function calcTratoTotal() {
   let total = 0;
   const statusDiv = document.getElementById('trato-estoque-status');
-  const avisos = [];
   tratoItens.forEach(it => {
     const custoUnit = it.custoUnit || getCustoUnitario(it.insumo);
     const sub = (it.qtd||0) * custoUnit;
     total += sub;
-    const saldo = getSaldoEstoque(it.insumo);
-    if (saldo === null) {
-      avisos.push(`⚠️ ${INSUMO_NOMES[it.insumo]||it.insumo}: sem estoque cadastrado`);
-    } else if (saldo < (it.qtd||0)) {
-      avisos.push(`⚠️ ${INSUMO_NOMES[it.insumo]||it.insumo}: saldo insuficiente (${saldo.toFixed(1)} kg disponíveis)`);
-    }
   });
+  const avisos = getAvisosEstoqueTrato();
   const el = document.getElementById('trato-total-preview');
   if (el) el.textContent = fmtR(total);
   if (statusDiv) {
@@ -1571,33 +1621,30 @@ window.salvarTrato = async function() {
   const trato = { id, animalId, data, itens, custo, obs, desc };
 
   try {
-    DB.tratos.push(trato);
-    await salvarFirestore('tratos', id, trato);
-
-    // ── DEBITAR ESTOQUE AUTOMATICAMENTE ──
-    for (const it of itens) {
-      const est = DB.estoque.find(e=>e.insumo===it.insumo);
-      if (est) {
-        const saldoAnterior = est.saldo || 0;
-        // Converter unidades para kg se necessário (para insumos em kg no estoque)
-        let qtdKg = it.qtd;
-        if (it.unidade === 'g') qtdKg = it.qtd / 1000;
-        else if (it.unidade === 'L' || it.unidade === 'mL') qtdKg = it.qtd; // tratar como equivalente
-        est.saldo = Math.max(0, saldoAnterior - qtdKg);
-        await salvarFirestore('estoque', est.id, est);
-      }
-      // Se insumo não está no estoque, apenas registra o trato (sem debitar)
-    }
-
-    // ── LANÇAR NO FINANCEIRO ──
     const finId = 'trato_'+id;
     const fin = {
       id: finId, tipo:'despesa', categoria:'trato',
       descricao: 'Trato: '+nomeAnimal(animalId)+' ('+desc+')',
       valor: custo, data, animalId
     };
+    const consumo = consumoTratoPorInsumo(itens);
+    const estoqueAtualizado = DB.estoque.map(est => {
+      const qtdKg = consumo[est.insumo] || 0;
+      return qtdKg ? { ...est, saldo: Math.max(0, (est.saldo || 0) - qtdKg) } : est;
+    });
+    const batch = writeBatch(db);
+    batch.set(docRef('tratos', id), dadosFirestore(trato), { merge: true });
+    estoqueAtualizado
+      .filter(est => consumo[est.insumo])
+      .forEach(est => batch.set(docRef('estoque', est.id), dadosFirestore(est), { merge: true }));
+    batch.set(docRef('financeiro', finId), dadosFirestore(fin), { merge: true });
+    setSyncStatus(false);
+    await batch.commit();
+    setSyncStatus(true);
+
+    DB.tratos.push(trato);
+    DB.estoque = estoqueAtualizado;
     DB.financeiro.push(fin);
-    await salvarFirestore('financeiro', finId, fin);
 
     // Reset formulário
     tratoItens = [{ insumo:'racao', nome:'Ração', qtd:5, unidade:'kg', custoUnit: getCustoUnitario('racao') }];
@@ -1605,8 +1652,10 @@ window.salvarTrato = async function() {
 
     renderTrato(); renderEstoque(); renderFinanceiro();
     if (btn) btn.textContent = '🌾 Registrar Trato';
+    unlockBtn('btn-salvar-trato');
     toast('✅ Trato registrado com sucesso! Custo: '+fmtR(custo), 'success');
   } catch(e) {
+    setSyncStatus(true);
     DB.tratos = DB.tratos.filter(t=>t.id!==id);
     if (btn) btn.textContent = '🌾 Registrar Trato';
     unlockBtn('btn-salvar-trato');
@@ -2012,33 +2061,51 @@ window.salvarEstoque = async function() {
   if (!qtd) { toast('Informe a quantidade','error'); unlockBtn('btn-salvar-estoque'); return; }
   const insumo = document.getElementById('e-insumo').value;
   const custo_kg = qtd ? val/qtd : 0;
-  // atualizar ou criar estoque do insumo
-  let est = DB.estoque.find(e=>e.insumo===insumo);
-  if (est) {
-    // média ponderada de preço
-    const saldoAnt = est.saldo||0;
-    const val_total = saldoAnt*est.custo_kg + qtd*custo_kg;
-    est.saldo = saldoAnt + qtd;
-    est.custo_kg = est.saldo ? val_total/est.saldo : custo_kg;
-    await salvarFirestore('estoque', est.id, est);
-  } else {
-    const id = uid();
-    est = { id, insumo, saldo: qtd, custo_kg, minimo: 50 };
-    DB.estoque.push(est);
-    await salvarFirestore('estoque', id, est);
+  try {
+    const estoqueAnterior = DB.estoque.find(e=>e.insumo===insumo);
+    let est;
+    if (estoqueAnterior) {
+      const saldoAnt = estoqueAnterior.saldo||0;
+      const val_total = saldoAnt*(estoqueAnterior.custo_kg||0) + qtd*custo_kg;
+      est = {
+        ...estoqueAnterior,
+        saldo: saldoAnt + qtd,
+        custo_kg: (saldoAnt + qtd) ? val_total/(saldoAnt + qtd) : custo_kg
+      };
+    } else {
+      est = { id: uid(), insumo, saldo: qtd, custo_kg, minimo: 50 };
+    }
+
+    const finId = val > 0 ? 'estoque_'+uid() : null;
+    const fin = finId ? {
+      id:finId, tipo:'despesa', categoria:'estoque',
+      descricao:'Compra: '+INSUMO_NOMES[insumo]+' '+qtd+'kg',
+      valor:val, data:document.getElementById('e-data').value
+    } : null;
+
+    const batch = writeBatch(db);
+    batch.set(docRef('estoque', est.id), dadosFirestore(est), { merge: true });
+    if (fin) batch.set(docRef('financeiro', finId), dadosFirestore(fin), { merge: true });
+    setSyncStatus(false);
+    await batch.commit();
+    setSyncStatus(true);
+
+    if (estoqueAnterior) {
+      DB.estoque = DB.estoque.map(e => e.id === est.id ? est : e);
+    } else {
+      DB.estoque.push(est);
+    }
+    if (fin) DB.financeiro.push(fin);
+    if (custo_kg > 0) INSUMOS_PRECO_FALLBACK[insumo] = custo_kg;
+    fecharModal('modal-estoque');
+    renderEstoque(); renderFinanceiro(); renderTratoItens();
+    unlockBtn('btn-salvar-estoque');
+    toast('Estoque atualizado!','success');
+  } catch(e) {
+    setSyncStatus(true);
+    unlockBtn('btn-salvar-estoque');
+    toast('Erro ao salvar estoque: ' + e.message, 'error');
   }
-  // lançar no financeiro
-  if (val>0) {
-    const finId = 'estoque_'+uid();
-    const fin = { id:finId, tipo:'despesa', categoria:'estoque', descricao:'Compra: '+INSUMO_NOMES[insumo]+' '+qtd+'kg', valor:val, data:document.getElementById('e-data').value };
-    DB.financeiro.push(fin);
-    await salvarFirestore('financeiro', finId, fin);
-  }
-  // atualizar preco padrao do insumo para calculos de trato
-  INSUMOS_PRECO[insumo] = custo_kg || INSUMOS_PRECO[insumo];
-  fecharModal('modal-estoque');
-  renderEstoque(); renderFinanceiro();
-  toast('Estoque atualizado!','success');
 };
 
 window.excluirEstoque = async function(id) {
@@ -2115,7 +2182,19 @@ function inicializarCampos() {
 
 // PWA
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
+  navigator.serviceWorker.register('sw.js').then(reg => {
+    reg.update().catch(()=>{});
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    reg.addEventListener('updatefound', () => {
+      const sw = reg.installing;
+      if (!sw) return;
+      sw.addEventListener('statechange', () => {
+        if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+          sw.postMessage({ type: 'SKIP_WAITING' });
+        }
+      });
+    });
+  }).catch(()=>{});
 }
 
 onAuthStateChanged(auth, async (user) => {
