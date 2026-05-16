@@ -451,6 +451,7 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
 
     <!-- FINANCEIRO -->
     <div class="page" id="pg-financeiro">
+      <div id="resumo-patrimonio"></div>
       <div class="metrics" id="metrics-fin"></div>
       <div class="card">
         <div class="inner-tabs">
@@ -534,6 +535,13 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
         <label class="form-label">Valor pago (R$)</label>
         <input type="number" class="form-control" id="f-valor" placeholder="0,00" step="0.01">
       </div>
+    </div>
+    <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--texto2)">
+        <input type="checkbox" id="f-inicial">
+        InventÃ¡rio / patrimÃ´nio inicial
+      </label>
+      <div style="font-size:11px;color:var(--texto3);margin-top:4px">Use para animal que jÃ¡ existia antes do sistema. O valor entra no patrimÃ´nio, sem virar despesa mensal.</div>
     </div>
     <div class="form-row cols2">
       <div class="form-group">
@@ -706,8 +714,19 @@ body{font-family:'DM Sans',sans-serif;color:var(--texto);font-size:14px}
       <input type="date" class="form-control" id="e-data">
     </div>
     <div class="form-group">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--texto2)">
+        <input type="checkbox" id="e-inicial">
+        InventÃ¡rio / patrimÃ´nio inicial
+      </label>
+      <div style="font-size:11px;color:var(--texto3);margin-top:4px">Use para saldo que jÃ¡ existia antes do sistema. Atualiza o estoque e patrimÃ´nio, sem criar despesa financeira.</div>
+    </div>
+    <div class="form-group">
       <label class="form-label">Fornecedor</label>
       <input class="form-control" id="e-fornecedor" placeholder="Nome do fornecedor">
+    </div>
+    <div class="form-group">
+      <label class="form-label">ObservaÃ§Ãµes (opcional)</label>
+      <input class="form-control" id="e-obs" placeholder="Ex: estoque jÃ¡ existente, lote antigo...">
     </div>
     <button class="btn btn-primary btn-full" id="btn-salvar-estoque" onclick="salvarEstoque()">Registrar Entrada</button>
     <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="fecharModal('modal-estoque')">Cancelar</button>
@@ -906,11 +925,18 @@ function hoje() { return new Date().toISOString().slice(0,10); }
 function fmtR(v) { return 'R$ ' + (parseFloat(v)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}); }
 function fmtData(d) { if (!d) return '—'; const p = d.split('-'); return p[2]+'/'+p[1]+'/'+p[0]; }
 function diasEntre(d1, d2) {
+  if (!d1 || !d2) return 0;
   const a = new Date(d1), b = new Date(d2);
+  if (Number.isNaN(a.getTime()) || Number.isNaN(b.getTime())) return 0;
   return Math.round((b-a)/(1000*60*60*24));
 }
 function addDias(data, n) {
   const d = new Date(data); d.setDate(d.getDate()+n); return d.toISOString().slice(0,10);
+}
+function noMesAtual(data) {
+  if (!data) return true;
+  const mes = hoje().slice(0,7);
+  return data.slice(0,7) === mes;
 }
 function custoAnimal(id) { return custoAnimalDetalhado(id).total; }
 function nomeAnimal(id) { const a = DB.animais.find(x=>x.id===id); return a ? a.nome : '—'; }
@@ -921,6 +947,29 @@ function textoSeguro(v) {
 function animalAtivoParaTrato(a) {
   const status = (a?.status || 'plantel').toLowerCase();
   return !!a && !['vendido','morto','inativo','baixado'].includes(status);
+}
+function isPatrimonioInicial(obj) {
+  return obj?.patrimonioInicial === true || obj?.inventarioInicial === true || obj?.origem === 'inventario_inicial';
+}
+function valorAnimalPatrimonial(a) {
+  return parseFloat(a?.valorPatrimonial ?? a?.valorCompra) || 0;
+}
+function valorEstoquePatrimonial(e) {
+  return (parseFloat(e?.saldo) || 0) * (parseFloat(e?.custo_kg) || 0);
+}
+function resumoPatrimonial() {
+  const animaisAtivos = DB.animais.filter(animalAtivoParaTrato);
+  const valorAnimais = animaisAtivos.reduce((s,a)=>s+valorAnimalPatrimonial(a),0);
+  const valorEstoque = DB.estoque.reduce((s,e)=>s+valorEstoquePatrimonial(e),0);
+  const inicialAnimais = animaisAtivos.filter(isPatrimonioInicial).reduce((s,a)=>s+valorAnimalPatrimonial(a),0);
+  const inicialEstoque = DB.estoque.reduce((s,e)=>s+(parseFloat(e.valorInicial)||0),0);
+  return {
+    animaisAtivos: animaisAtivos.length,
+    valorAnimais,
+    valorEstoque,
+    inventarioInicial: inicialAnimais + inicialEstoque,
+    patrimonioTotal: valorAnimais + valorEstoque
+  };
 }
 function categoriaAnimal(a) {
   if (!a) return 'Outros';
@@ -956,7 +1005,7 @@ function custoAnimalDetalhado(id) {
   const inicio = a.dataEntrada || '1900-01-01';
   const fim = a.status === 'vendido' && a.dataSaida ? a.dataSaida : '9999-12-31';
   const noPeriodo = d => !d || (d >= inicio && d <= fim);
-  const compra = parseFloat(a.valorCompra)||0;
+  const compra = isPatrimonioInicial(a) ? 0 : (parseFloat(a.valorCompra)||0);
   const tratos = DB.tratos.filter(t=>t.animalId===id && noPeriodo(t.data)).reduce((s,t)=>s+(parseFloat(t.custo)||0),0);
   const saude = DB.saude.filter(r=>r.animalId===id && noPeriodo(r.data)).reduce((s,r)=>s+(parseFloat(r.custo)||0),0);
   return {compra,tratos,saude,total:compra+tratos+saude};
@@ -1044,7 +1093,7 @@ function renderTudo() {
   renderTrato();
   renderSaude();
   renderCalendario();
-  renderEstoque();
+  renderEstoque(); renderFinanceiro();
   renderFinanceiro();
   atualizarBadgeSaude();
 }
@@ -1112,6 +1161,7 @@ function animalCardHTML(a) {
   if (prenhez) badges += `<span class="badge badge-gold">🤰 Gestante</span> `;
   if (a.linkedMaeId) badges += `<span class="badge badge-blue">Cria de ${nomeAnimal(a.linkedMaeId)}</span> `;
   if (a.status === 'vendido') badges += `<span class="badge badge-gray">Vendido ${fmtData(a.dataSaida)}</span>`;
+  if (isPatrimonioInicial(a)) badges += `<span class="badge badge-gray">PatrimÃ´nio inicial</span>`;
   return `<div class="animal-card ${a.status==='vendido'?'vendido':''}" onclick="abrirFicha('${a.id}')">
     <div class="animal-row">
       <div class="animal-emoji">${ESPECIES[a.especie]||'🐾'}</div>
@@ -1245,6 +1295,7 @@ window.abrirModalAnimal = function(id) {
     document.getElementById('f-entrada').value = a.dataEntrada || hoje();
     document.getElementById('f-especie').value = a.especie || 'vaca';
     document.getElementById('f-sexo').value = a.sexo || 'femea';
+    document.getElementById('f-inicial').checked = isPatrimonioInicial(a);
   } else {
     ['f-nome','f-raca','f-obs'].forEach(x=>document.getElementById(x).value='');
     document.getElementById('f-valor').value='';
@@ -1253,6 +1304,7 @@ window.abrirModalAnimal = function(id) {
     document.getElementById('f-entrada').value = hoje();
     document.getElementById('f-especie').value='vaca';
     document.getElementById('f-sexo').value='femea';
+    document.getElementById('f-inicial').checked = false;
   }
   abrirModal('modal-animal');
 };
@@ -1264,16 +1316,22 @@ window.salvarAnimal = async function() {
   const nome = document.getElementById('f-nome').value.trim();
   if (!nome) { toast('Informe o nome do animal','error'); unlockBtn('btn-salvar-animal'); return; }
   const id = document.getElementById('animal-edit-id').value || uid();
+  const patrimonioInicial = document.getElementById('f-inicial').checked;
+  const valorCompra = parseFloat(document.getElementById('f-valor').value)||0;
   const dados = {
     id, nome,
     especie: document.getElementById('f-especie').value,
     raca: document.getElementById('f-raca').value.trim(),
     sexo: document.getElementById('f-sexo').value,
     dataEntrada: document.getElementById('f-entrada').value,
-    valorCompra: parseFloat(document.getElementById('f-valor').value)||0,
+    valorCompra,
+    valorPatrimonial: valorCompra,
     pesoEntrada: parseFloat(document.getElementById('f-peso').value)||0,
     dataNascimento: document.getElementById('f-nascimento').value,
     obs: document.getElementById('f-obs').value.trim(),
+    patrimonioInicial,
+    inventarioInicial: patrimonioInicial,
+    origem: patrimonioInicial ? 'inventario_inicial' : 'compra',
     status: (DB.animais.find(x=>x.id===id)?.status)||'plantel'
   };
   const idx = DB.animais.findIndex(a=>a.id===id);
@@ -1281,13 +1339,18 @@ window.salvarAnimal = async function() {
   await salvarFirestore('animais', id, dados);
   // lançar compra no financeiro
   const finId = 'compra_'+id;
-  const fin = { id:finId, tipo:'despesa', categoria:'compra', descricao:'Compra: '+nome, valor:dados.valorCompra, data:dados.dataEntrada, animalId:id };
-  const fi = DB.financeiro.findIndex(f=>f.id===finId);
-  if (fi>=0) DB.financeiro[fi]=fin; else DB.financeiro.push(fin);
-  await salvarFirestore('financeiro', finId, fin);
+  if (patrimonioInicial) {
+    DB.financeiro = DB.financeiro.filter(f=>f.id!==finId);
+    await deletarFirestore('financeiro', finId);
+  } else {
+    const fin = { id:finId, tipo:'despesa', categoria:'compra', descricao:'Compra: '+nome, valor:dados.valorCompra, data:dados.dataEntrada, animalId:id };
+    const fi = DB.financeiro.findIndex(f=>f.id===finId);
+    if (fi>=0) DB.financeiro[fi]=fin; else DB.financeiro.push(fin);
+    await salvarFirestore('financeiro', finId, fin);
+  }
   fecharModal('modal-animal');
-  renderAnimais();
-  toast(nome+' salvo com sucesso!','success');
+  renderAnimais(); renderFinanceiro();
+  toast(patrimonioInicial ? nome+' salvo como patrimÃ´nio inicial!' : nome+' salvo com sucesso!','success');
 };
 
 window.excluirAnimal = async function(id) {
@@ -2120,9 +2183,11 @@ window.encerrarPrenhez = async function(id) {
 // ─── ESTOQUE ────────────────────────────────────────────────
 function renderEstoque() {
   const totalVal = DB.estoque.reduce((s,e)=>(s+(e.saldo||0)*e.custo_kg),0);
+  const totalInicial = DB.estoque.reduce((s,e)=>s+(parseFloat(e.valorInicial)||0),0);
   const baixos = DB.estoque.filter(e=>e.saldo<e.minimo).length;
   document.getElementById('metrics-estoque').innerHTML = `
     <div class="metric"><div class="metric-label">Valor em estoque</div><div class="metric-val">${fmtR(totalVal)}</div></div>
+    <div class="metric"><div class="metric-label">InventÃ¡rio inicial</div><div class="metric-val">${fmtR(totalInicial)}</div></div>
     <div class="metric"><div class="metric-label">Itens abaixo mínimo</div><div class="metric-val ${baixos?'red':''}">${baixos}</div></div>`;
   if (!DB.estoque.length) {
     document.getElementById('lista-estoque').innerHTML = '<div class="empty"><div class="empty-ico">📦</div><div class="empty-txt">Nenhum insumo cadastrado.<br>Toque em + Entrada para adicionar.</div></div>';
@@ -2134,7 +2199,7 @@ function renderEstoque() {
     return `<div class="est-row">
       <div class="est-header">
         <div class="est-emoji">${INSUMO_EMOJI[e.insumo]||'📦'}</div>
-        <div class="est-nome">${INSUMO_NOMES[e.insumo]||e.insumo}</div>
+        <div class="est-nome">${INSUMO_NOMES[e.insumo]||e.insumo}${isPatrimonioInicial(e)?' <span class="badge badge-gray">Inicial</span>':''}</div>
         <div class="est-saldo" style="color:${baixo?'var(--danger)':''}">${(e.saldo||0).toFixed(1)} kg</div>
         <button onclick="excluirEstoque('${e.id}')" style="background:none;border:none;color:var(--texto3);cursor:pointer;font-size:13px">✕</button>
       </div>
@@ -2149,10 +2214,11 @@ function renderEstoque() {
 }
 
 window.abrirModalEstoque = function() {
-  ['e-qtd','e-valor','e-fornecedor'].forEach(x=>document.getElementById(x).value='');
+  ['e-qtd','e-valor','e-fornecedor','e-obs'].forEach(x=>document.getElementById(x).value='');
   document.getElementById('e-insumo').value='racao';
   document.getElementById('e-data').value=hoje();
   document.getElementById('e-custo-kg').textContent='Custo por kg: —';
+  document.getElementById('e-inicial').checked = false;
   abrirModal('modal-estoque');
 };
 
@@ -2168,6 +2234,9 @@ window.salvarEstoque = async function() {
   const val = parseFloat(document.getElementById('e-valor').value)||0;
   if (!qtd) { toast('Informe a quantidade','error'); unlockBtn('btn-salvar-estoque'); return; }
   const insumo = document.getElementById('e-insumo').value;
+  const patrimonioInicial = document.getElementById('e-inicial').checked;
+  const fornecedor = document.getElementById('e-fornecedor').value.trim();
+  const obs = document.getElementById('e-obs').value.trim();
   const custo_kg = qtd ? val/qtd : 0;
   try {
     const estoqueAnterior = DB.estoque.find(e=>e.insumo===insumo);
@@ -2178,13 +2247,28 @@ window.salvarEstoque = async function() {
       est = {
         ...estoqueAnterior,
         saldo: saldoAnt + qtd,
-        custo_kg: (saldoAnt + qtd) ? val_total/(saldoAnt + qtd) : custo_kg
+        custo_kg: (saldoAnt + qtd) ? val_total/(saldoAnt + qtd) : custo_kg,
+        valorInicial: (parseFloat(estoqueAnterior.valorInicial)||0) + (patrimonioInicial ? val : 0),
+        qtdInicial: (parseFloat(estoqueAnterior.qtdInicial)||0) + (patrimonioInicial ? qtd : 0),
+        obsInicial: patrimonioInicial ? obs : estoqueAnterior.obsInicial,
+        fornecedor,
+        patrimonioInicial: estoqueAnterior.patrimonioInicial === true || patrimonioInicial,
+        inventarioInicial: estoqueAnterior.inventarioInicial === true || patrimonioInicial
       };
     } else {
-      est = { id: uid(), insumo, saldo: qtd, custo_kg, minimo: 50 };
+      est = {
+        id: uid(), insumo, saldo: qtd, custo_kg, minimo: 50,
+        valorInicial: patrimonioInicial ? val : 0,
+        qtdInicial: patrimonioInicial ? qtd : 0,
+        obsInicial: patrimonioInicial ? obs : '',
+        fornecedor,
+        patrimonioInicial,
+        inventarioInicial: patrimonioInicial,
+        origem: patrimonioInicial ? 'inventario_inicial' : 'compra'
+      };
     }
 
-    const finId = val > 0 ? 'estoque_'+uid() : null;
+    const finId = val > 0 && !patrimonioInicial ? 'estoque_'+uid() : null;
     const fin = finId ? {
       id:finId, tipo:'despesa', categoria:'estoque',
       descricao:'Compra: '+INSUMO_NOMES[insumo]+' '+qtd+'kg',
@@ -2208,7 +2292,7 @@ window.salvarEstoque = async function() {
     fecharModal('modal-estoque');
     renderEstoque(); renderFinanceiro(); renderTratoItens();
     unlockBtn('btn-salvar-estoque');
-    toast('Estoque atualizado!','success');
+    toast(patrimonioInicial ? 'Estoque salvo como inventÃ¡rio inicial!' : 'Estoque atualizado!','success');
   } catch(e) {
     setSyncStatus(true);
     unlockBtn('btn-salvar-estoque');
@@ -2227,16 +2311,32 @@ window.excluirEstoque = async function(id) {
 
 // ─── FINANCEIRO ─────────────────────────────────────────────
 function renderFinanceiro() {
-  const despesas = DB.financeiro.filter(f=>f.tipo==='despesa');
-  const receitas = DB.financeiro.filter(f=>f.tipo==='receita');
+  const fluxo = DB.financeiro.filter(f=>!isPatrimonioInicial(f) && noMesAtual(f.data));
+  const despesas = fluxo.filter(f=>f.tipo==='despesa');
+  const receitas = fluxo.filter(f=>f.tipo==='receita');
   const totalDesp = despesas.reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
   const totalRec = receitas.reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
   const lucro = totalRec - totalDesp;
+  const patrimonio = resumoPatrimonial();
+
+  const resumoEl = document.getElementById('resumo-patrimonio');
+  if (resumoEl) {
+    resumoEl.innerHTML = `<div class="card" style="margin-bottom:10px">
+      <div class="card-title" style="margin-bottom:10px">PatrimÃ´nio / InventÃ¡rio</div>
+      <div class="metrics" style="margin-bottom:0">
+        <div class="metric"><div class="metric-label">PatrimÃ´nio total</div><div class="metric-val">${fmtR(patrimonio.patrimonioTotal)}</div></div>
+        <div class="metric"><div class="metric-label">Animais ativos</div><div class="metric-val">${fmtR(patrimonio.valorAnimais)}</div></div>
+        <div class="metric"><div class="metric-label">Estoque atual</div><div class="metric-val">${fmtR(patrimonio.valorEstoque)}</div></div>
+        <div class="metric"><div class="metric-label">InventÃ¡rio inicial</div><div class="metric-val">${fmtR(patrimonio.inventarioInicial)}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--texto3);margin-top:8px">Valores de inventÃ¡rio inicial nÃ£o entram como despesa nem prejuÃ­zo do fluxo financeiro.</div>
+    </div>`;
+  }
 
   document.getElementById('metrics-fin').innerHTML = `
-    <div class="metric"><div class="metric-label">Total receitas</div><div class="metric-val green">${fmtR(totalRec)}</div></div>
-    <div class="metric"><div class="metric-label">Total despesas</div><div class="metric-val red">${fmtR(totalDesp)}</div></div>
-    <div class="metric"><div class="metric-label">Lucro líquido</div><div class="metric-val ${lucro>=0?'green':'red'}">${fmtR(lucro)}</div></div>
+    <div class="metric"><div class="metric-label">Receitas do mes</div><div class="metric-val green">${fmtR(totalRec)}</div></div>
+    <div class="metric"><div class="metric-label">Despesas do mes</div><div class="metric-val red">${fmtR(totalDesp)}</div></div>
+    <div class="metric"><div class="metric-label">Lucro/prejuizo do mes</div><div class="metric-val ${lucro>=0?'green':'red'}">${fmtR(lucro)}</div></div>
     <div class="metric"><div class="metric-label">Margem</div><div class="metric-val ${lucro>=0?'green':'red'}">${totalRec?Math.round(lucro/totalRec*100):0}%</div></div>`;
 
   const tab = innerTabAtual.fin;
@@ -2252,11 +2352,11 @@ function renderFinanceiro() {
     </div>`).join('') : `<div class="empty" style="padding:20px"><div class="empty-txt">Nenhum registro.</div></div>`;
 
   // por animal
-  const porAnimal = DB.animais.map(a => ({
-    a,
-    custo: custoAnimal(a.id),
-    receita: a.status==='vendido' ? (parseFloat(a.valorVenda)||0) : 0
-  })).filter(x=>x.custo>0||x.receita>0).sort((a,b)=>b.custo-a.custo);
+  const porAnimal = DB.animais.map(a => {
+    const despesasAnimal = despesas.filter(f=>f.animalId===a.id).reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
+    const receitaAnimal = receitas.filter(f=>f.animalId===a.id).reduce((s,f)=>s+(parseFloat(f.valor)||0),0);
+    return { a, custo: despesasAnimal, receita: receitaAnimal };
+  }).filter(x=>x.custo>0||x.receita>0).sort((a,b)=>b.custo-a.custo);
 
   document.getElementById('fin-por-animal').innerHTML = porAnimal.length ? porAnimal.map(x=>`
     <div class="list-item">
